@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Finale | 모바일 웹 데모</title>
-  <meta name="description" content="상속·세무 지원 모바일 웹 데모" />
+  
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
@@ -52,32 +52,40 @@
   </aside>
 
   <header id="appbar" class="appbar" aria-label="상단 내비게이션 바">
-    <button class="icon-btn" onclick="toggleMenu()" style="margin-right: 5px;">☰</button>
-    <button class="icon-btn" id="backBtn" aria-label="뒤로가기" data-action="back" hidden>←</button>
-    <div class="brand"><span class="logo">F</span> Finale</div>
-    <div class="spacer"></div>
-    <button class="icon-btn" aria-label="검색">🔍</button>
-    <button class="icon-btn" aria-label="알림">🔔</button>
+    <div class="hstack">
+        <button class="icon-btn" onclick="toggleMenu()">☰</button>
+        <button class="icon-btn" id="backBtn" aria-label="뒤로가기" data-action="back" hidden>←</button>
+    </div>
+    <div class="brand-center">
+        <svg class="brand-logo-svg" viewBox="0 0 100 24" xmlns="http://www.w3.org/2000/svg">
+            <path d="M4 2h16v3H4zM6 6h2v14H6zM11 6h2v14h-2zM16 6h2v14h-2zM3 21h18v2H3z" fill="#5F0080"/>
+            <text x="30" y="20" font-family="serif" font-weight="bold" font-size="20" fill="#5F0080" letter-spacing="1">Finale</text>
+        </svg>
+    </div>
+    <div class="hstack">
+        <button class="icon-btn" aria-label="검색">🔍</button>
+        <button class="icon-btn" aria-label="알림">🔔</button>
+    </div>
   </header>
 
   <main id="app" class="app container">
     <section class="screen" id="login" data-title="로그인" data-show-bottomnav="false">
-      <div class="card logo-card">
-        <div class="brand-xl"><span class="logo">F</span> Finale</div>
-        <p class="muted">복잡한 상속, 이제는 쉽고 간편하게</p>
-        <form id="loginForm" class="vstack gap-10" autocomplete="off">
+      <div class="card logo-card" style="text-align:center; padding-top:40px;">
+        <svg viewBox="0 0 100 100" width="80" height="80" style="margin-bottom:10px;">
+             <circle cx="50" cy="50" r="45" fill="#f3e5f5" />
+             <path d="M30 30h40v10H30zM35 45h5v30h-5zM47.5 45h5v30h-5zM60 45h5v30h-5zM25 80h50v5H25z" fill="#5F0080"/>
+        </svg>
+        <h1 class="title-lg" style="color:#5F0080; font-family:serif;">Finale</h1>
+        <p class="muted mt-6">복잡한 상속, 이제는 쉽고 간편하게</p>
+        <form id="loginForm" class="vstack gap-10 mt-10" autocomplete="off" style="text-align:left;">
           <label class="input"><span>아이디(이메일)</span><input type="email" required placeholder="name@example.com" /></label>
           <label class="input"><span>비밀번호</span><input type="password" required placeholder="••••••••" /></label>
           <div class="right small"><a href="#" class="muted">아이디/비밀번호 찾기</a></div>
-          <button class="btn primary" type="submit">로그인</button>
+          <button class="btn primary full" type="submit">로그인</button>
         </form>
-        <div class="or">간편 로그인</div>
-        <div class="oauth">
-          <button class="chip">Kakao</button>
-          <button class="chip">Naver</button>
-          <button class="chip">Google</button>
-        </div>
-        <button id="goSignup" class="btn ghost full">회원가입</button>
+        <div class="or" style="text-align:center; margin:15px 0; color:#aaa; font-size:12px;">간편 로그인</div>
+        <div class="oauth center gap-4"><button class="chip">Kakao</button><button class="chip">Naver</button><button class="chip">Google</button></div>
+        <button id="goSignup" class="btn ghost full mt-10">회원가입</button>
       </div>
     </section>
 
@@ -121,12 +129,8 @@
 
     <section class="screen" id="choose" data-title="서비스 선택">
       <div class="vstack gap-10">
-        <a class="select-card" href="#legal">
-          <div class="ic">⚖️</div><div class="select-title">법무 서비스</div><div class="select-desc">상속 확인, 등기, 유류분 등 법률 절차</div>
-        </a>
-        <a class="select-card" href="#tax">
-          <div class="ic">🧾</div><div class="select-title">세무 서비스</div><div class="select-desc">상속세 계산, 신고 지원, 증여세 상담</div>
-        </a>
+        <a class="select-card" href="#legal"><div class="ic">⚖️</div><div class="select-title">법무 서비스</div><div class="select-desc">상속 확인, 등기, 유류분 등 법률 절차</div></a>
+        <a class="select-card" href="#tax"><div class="ic">🧾</div><div class="select-title">세무 서비스</div><div class="select-desc">상속세 계산, 신고 지원, 증여세 상담</div></a>
       </div>
     </section>
 
@@ -166,9 +170,8 @@
             <div class="doc-header"><div class="doc-title" style="font-size:16px;">상속세 과세표준신고 및<br>자진납부계산서</div><div style="font-size:10px; margin-top:5px;">[별지 제1호 서식]</div></div>
             <table class="doc-table"><tr><th rowspan="2">피상속인</th><th>성명</th><td>김철수</td></tr><tr><th>주민번호</th><td>480101-*******</td></tr><tr><th rowspan="2">상속인<br>대표자</th><th>성명</th><td>이영희</td></tr><tr><th>관계</th><td>배우자</td></tr></table>
             <p style="font-size:12px; font-weight:bold; margin-bottom:5px;">세액 계산 내용</p>
-            <table class="doc-table"><thead><tr><th>구분</th><th>금액 (원)</th></tr></thead><tbody><tr><td>① 상속재산가액</td><td style="text-align:right;">1,250,000,000</td></tr><tr><td>② 채무 및 비용</td><td style="text-align:right; color:red;">- 105,000,000</td></tr><tr><td>③ 상속공제액</td><td style="text-align:right; color:red;">- 1,000,000,000</td></tr><tr class="highlight-bg"><td>④ 과세표준 (①-②-③)</td><td style="text-align:right; font-weight:bold;">145,000,000</td></tr><tr><td>⑤ 산출세액</td><td style="text-align:right;">19,000,000</td></tr><tr class="highlight-bg"><td style="font-weight:bold;">⑥ 자진납부할 세액</td><td style="text-align:right; font-weight:bold; color:#5F0080;">18,430,000</td></tr></tbody></table>
-            <div class="tiny center mt-10" style="color:#666; line-height:1.6;">「상속세 및 증여세법」 제67조에 따라<br>위와 같이 신고 및 납부합니다.<br>2025년 10월 12일</div>
-            <div style="text-align:right; margin-top:20px; font-size:12px; font-weight:bold; padding-right:10px;">신고인: 이영희 (서명 또는 인)</div>
+            <table class="doc-table"><thead><tr><th>구분</th><th>금액 (원)</th></tr></thead><tbody><tr><td>① 상속재산가액</td><td style="text-align:right;">1,250,000,000</td></tr><tr><td>② 채무 및 비용</td><td style="text-align:right; color:red;">- 105,000,000</td></tr><tr class="highlight-bg"><td>⑥ 자진납부할 세액</td><td style="text-align:right; font-weight:bold; color:#5F0080;">18,430,000</td></tr></tbody></table>
+            <div class="tiny center mt-10" style="color:#666; line-height:1.6;">「상속세 및 증여세법」 제67조에 따라<br>위와 같이 신고 및 납부합니다.</div><div style="text-align:right; margin-top:20px; font-size:12px; font-weight:bold; padding-right:10px;">신고인: 이영희 (서명 또는 인)</div>
         </div>
         <button class="btn primary full mt-10">세무 대리인에게 전송</button>
     </section>
@@ -179,12 +182,12 @@
         <button class="btn primary full mt-10">자산 확정 및 분석 요청</button>
     </section>
     <section class="screen" id="legal-heir-sample" data-title="상속인 확인">
-        <div class="card mb-10"><div class="hstack space-between"><h3 class="title-sm">상속 순위 확인</h3><span class="chip" style="background:#5F0080; color:white;">1순위 확정</span></div><p class="tiny muted mt-6">민법 제1000조에 의거한 법정 상속인입니다.</p></div>
+        <div class="card mb-10"><div class="hstack space-between"><h3 class="title-sm">상속 순위 확인</h3><span class="chip" style="background:#5F0080; color:white;">1순위 확정</span></div></div>
         <div class="doc-paper"><div class="doc-header"><div class="doc-title">가족관계증명서 (상세)</div></div><p style="font-size:12px; margin-bottom:5px;">[본인] 피상속인</p><table class="doc-table"><tr><th>성명</th><td>김철수</td><th>출생연월일</th><td>1948.01.01</td></tr><tr><th>등록기준지</th><td colspan="3">서울특별시 종로구...</td></tr></table><p style="font-size:12px; margin-bottom:5px;">[가족] 상속인 명단</p><table class="doc-table"><thead><tr><th>구분</th><th>성명</th><th>생년월일</th><th>상속지분</th></tr></thead><tbody><tr class="highlight-bg"><td>배우자</td><td>이영희</td><td>1950.05.05</td><td>1.5 / 3.5</td></tr><tr class="highlight-bg"><td>자녀</td><td>김아들</td><td>1978.08.15</td><td>1.0 / 3.5</td></tr><tr class="highlight-bg"><td>자녀</td><td>김딸</td><td>1980.12.25</td><td>1.0 / 3.5</td></tr></tbody></table><div class="tiny center mt-10" style="color:#666;">위와 같이 증명함. <br> 2025년 10월 12일</div><div style="text-align:center; margin-top:20px; font-size:14px; font-weight:bold;">법 원 행 정 처 장</div><div class="stamp-box">인</div></div>
         <div class="hstack gap-10 mt-10"><button class="btn ghost full">수정 요청</button><button class="btn primary full">상속 지분 확정</button></div>
     </section>
     <section class="screen" id="legal-reg-sample" data-title="상속 등기">
-        <div class="card mb-10"><h3 class="title-sm">부동산 등기 준비</h3><p class="tiny muted mt-6">전자 등기 신청서를 미리 작성해보았습니다.</p></div>
+        <div class="card mb-10"><h3 class="title-sm">부동산 등기 준비</h3></div>
         <div class="doc-paper"><div class="doc-header"><div class="doc-title">소유권이전등기신청</div><div style="font-size:11px;">(상속)</div></div><table class="doc-table"><tr><th>부동산의 표시</th><td>서울시 서초구 반포동... <br> 반포자이 101동 101호</td></tr><tr><th>등기 원인</th><td>2025년 10월 1일 상속</td></tr><tr><th>등기 목적</th><td>소유권 이전</td></tr></table><p style="font-size:12px; font-weight:bold; margin-bottom:5px;">신청인(권리자)</p><table class="doc-table"><tr><th>성명</th><td>이영희 외 2명</td></tr><tr><th>주소</th><td>서울시 서초구...</td></tr></table><div class="vstack gap-4" style="margin-top:10px; border:1px dashed #888; padding:10px; font-size:11px; color:#555;"><div>[첨부 서류]</div><div>☑ 토지대장 및 건축물대장</div><div>☑ 상속재산분할협의서</div><div>☑ 취득세영수필확인서</div></div></div>
         <button class="btn primary full mt-10">등기 전문가에게 전송</button>
     </section>
@@ -201,7 +204,7 @@
             <div id="tab-common" class="check-content active"><div class="check-group"><div class="check-group-title">📋 모든 상속 절차 공통</div><label class="check-item"><input type="checkbox"><div><div class="bold">피상속인 기본증명서 (상세)</div><div class="check-desc">주민번호 공개 필수</div></div></label><label class="check-item"><input type="checkbox"><div><div class="bold">피상속인 가족관계증명서 (상세)</div></div></label><label class="check-item"><input type="checkbox"><div><div class="bold">피상속인 주민등록 말소자초본</div><div class="check-desc">과거 주소 변동 내역 전체 포함</div></div></label><label class="check-item"><input type="checkbox"><div><div class="bold">상속인 전원 기본증명서 (상세)</div></div></label><label class="check-item"><input type="checkbox"><div><div class="bold">상속인 전원 인감증명서</div><div class="check-desc">3개월 이내 발급분</div></div></label><label class="check-item"><input type="checkbox"><div><div class="bold">상속인 전원 신분증 사본</div></div></label></div></div>
             <div id="tab-estate" class="check-content"><div class="check-group"><div class="check-group-title">🏠 부동산 상속 등기 시</div><label class="check-item"><input type="checkbox"><div><div class="bold">토지/임야/건축물 대장</div><div class="check-desc">정부24 발급</div></div></label><label class="check-item"><input type="checkbox"><div><div class="bold">취득세 신고서 및 납부확인서</div><div class="check-desc">관할 구청 세무과</div></div></label><label class="check-item"><input type="checkbox"><div><div class="bold">국민주택채권 매입필증</div><div class="check-desc">은행 발행</div></div></label><label class="check-item"><input type="checkbox"><div><div class="bold">상속재산분할협의서</div><div class="check-desc">전원 인감 날인 필수</div></div></label></div></div>
             <div id="tab-bank" class="check-content"><div class="check-group"><div class="check-group-title">💰 예금/보험금 찾을 때</div><label class="check-item"><input type="checkbox"><div><div class="bold">금융거래조회신청서 (상속인용)</div></div></label><label class="check-item"><input type="checkbox"><div><div class="bold">상속재산분할협의서 (금융기관용)</div><div class="check-desc">은행마다 양식이 다를 수 있음</div></div></label><label class="check-item"><input type="checkbox"><div><div class="bold">통장 실물 또는 도장</div><div class="check-desc">없는 경우 분실신고 병행</div></div></label></div></div>
-            <div id="tab-giveup" class="check-content"><div class="check-group"><div class="check-group-title">⚖ 빚이 더 많을 때</div><label class="check-item"><input type="checkbox"><div><div class="bold">상속포기/한정승인 심판청구서</div><div class="check-desc">가정법원 제출</div></div></label><label class="check-item"><input type="checkbox"><div><div class="bold">상속재산목록</div><div class="check-desc">적극재산 및 소극재산(빚) 기재</div></div></label><label class="check-item"><input type="checkbox"><div><div class="bold">부채증명서</div><div class="check-desc">각 채권자(은행/카드사) 발급</div></div></label></div></div>
+            <div id="tab-giveup" class="check-content"><div class="check-group"><div class="check-group-title">⚖️ 빚이 더 많을 때</div><label class="check-item"><input type="checkbox"><div><div class="bold">상속포기/한정승인 심판청구서</div><div class="check-desc">가정법원 제출</div></div></label><label class="check-item"><input type="checkbox"><div><div class="bold">상속재산목록</div><div class="check-desc">적극재산 및 소극재산(빚) 기재</div></div></label><label class="check-item"><input type="checkbox"><div><div class="bold">부채증명서</div><div class="check-desc">각 채권자(은행/카드사) 발급</div></div></label></div></div>
             <div class="mt-10 center"><button class="btn primary full" onclick="alert('선택한 목록이 저장되었습니다!')">체크리스트 저장하기</button></div>
         </div>
     </section>
