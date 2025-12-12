@@ -2,494 +2,523 @@
 <html lang="ko">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Finale | 모바일 웹 데모</title>
-  <style>
-    /* === 1. 필수 레이아웃 & 화면 전환 로직 === */
-    body { margin: 0; background-color: #f5f5f5; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-    
-    /* [핵심] 모든 화면은 기본적으로 숨김 */
-    .screen {
-        display: none;
-        padding-top: 70px; /* 헤더 높이만큼 여백 */
-        padding-bottom: 80px; /* 탭바 높이만큼 여백 */
-        max-width: 600px;
-        margin: 0 auto;
-        padding-left: 15px;
-        padding-right: 15px;
-        animation: fadeIn 0.3s ease;
-    }
-    
-    /* [핵심] 활성화된 화면만 보임 */
-    .screen.active {
-        display: block;
-    }
-    
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
-
-    /* 상단 헤더 고정 */
-    .appbar {
-        position: fixed; top: 0; left: 0; width: 100%; height: 56px;
-        background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px);
-        border-bottom: 1px solid rgba(0,0,0,0.05);
-        display: flex; align-items: center; justify-content: space-between;
-        padding: 0 15px; box-sizing: border-box; z-index: 1000;
-    }
-    .brand-center { position: absolute; left: 50%; transform: translateX(-50%); display: flex; align-items: center; }
-    .brand-logo-svg { height: 22px; width: auto; display: block; }
-    .icon-btn { background: none; border: none; font-size: 20px; cursor: pointer; padding: 5px; }
-
-    /* === 2. UI 컴포넌트 디자인 === */
-    .card { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); margin-bottom: 15px; }
-    .btn { padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; border: none; font-size: 14px; transition: 0.2s; }
-    .btn.primary { background: #5F0080; color: white; }
-    .btn.ghost { background: transparent; color: #5F0080; }
-    .btn.small { padding: 6px 12px; font-size: 12px; }
-    .btn.full { width: 100%; }
-    .hstack { display: flex; align-items: center; }
-    .vstack { display: flex; flex-direction: column; }
-    .gap-10 { gap: 10px; } .gap-4 { gap: 4px; }
-    .space-between { justify-content: space-between; }
-    .center { text-align: center; justify-content: center; }
-    .bold { font-weight: bold; } .tiny { font-size: 12px; } .muted { color: #888; } .grow { flex-grow: 1; }
-    .title-lg { font-size: 22px; font-weight: bold; margin: 0; }
-    .title-sm { font-size: 16px; font-weight: bold; margin: 0; }
-    
-    /* 탭바 & 사이드메뉴 */
-    .tabbar { position: fixed; bottom: 0; left: 0; width: 100%; height: 60px; background: white; border-top: 1px solid #eee; display: flex; justify-content: space-around; align-items: center; z-index: 900; }
-    .tab { text-decoration: none; color: #999; font-size: 10px; display: flex; flex-direction: column; align-items: center; gap: 4px; width: 100%; }
-    .tab.active { color: #5F0080; font-weight: bold; }
-    .tab .ic { font-size: 20px; }
-    
-    #sideMenu { position: fixed; top: 0; left: -280px; width: 280px; height: 100%; background: white; z-index: 2000; transition: left 0.3s ease; box-shadow: 2px 0 10px rgba(0,0,0,0.1); overflow-y: auto; }
-    #sideMenu.active { left: 0; }
-    #menuOverlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1999; display: none; }
-    #menuOverlay.active { display: block; }
-    .menu-header { padding: 20px; background: #f8f9fa; border-bottom: 1px solid #eee; }
-    .menu-list { list-style: none; padding: 0; margin: 0; }
-    .menu-list li { border-bottom: 1px solid #f0f0f0; }
-    .menu-list a { display: block; padding: 15px 20px; text-decoration: none; color: #333; font-size: 15px; }
-    .badge-new { background: #e74c3c; color: white; font-size: 10px; padding: 2px 5px; border-radius: 4px; margin-left: 5px; vertical-align: middle; }
-
-    /* 리스트 & 그리드 */
-    .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 20px; }
-    .shortcut { display: flex; flex-direction: column; align-items: center; gap: 8px; text-decoration: none; color: #333; font-size: 12px; }
-    .shortcut .ic { width: 50px; height: 50px; background: #fff; border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 24px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-    .list-elev { list-style: none; padding: 0; margin: 0; }
-    .list-item { display: flex; align-items: center; justify-content: space-between; background: white; padding: 15px; border-radius: 12px; margin-bottom: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
-    .select-card { display: flex; align-items: center; gap: 15px; background: white; padding: 20px; border-radius: 12px; text-decoration: none; color: #333; box-shadow: 0 2px 5px rgba(0,0,0,0.05); border: 1px solid transparent; transition: 0.2s; }
-    .select-card:hover { border-color: #5F0080; }
-    .select-title { font-weight: bold; font-size: 16px; }
-    .select-desc { font-size: 12px; color: #888; margin-top: 4px; }
-
-    /* 체크리스트 */
-    .check-tab-btn { background: white; border: 1px solid #eee; padding: 8px 16px; border-radius: 20px; font-size: 13px; color: #666; cursor: pointer; transition: 0.2s; }
-    .check-tab-btn.active { background: #5F0080; color: white; border-color: #5F0080; font-weight: bold; }
-    .check-content { display: none; animation: fadeIn 0.3s ease; }
-    .check-content.active { display: block; }
-    .check-group { margin-bottom: 20px; }
-    .check-group-title { font-weight: bold; color: #5F0080; margin-bottom: 8px; font-size: 14px; background: #fdfaff; padding: 8px; border-radius: 4px; }
-    .check-item { display: flex; align-items: flex-start; padding: 8px 5px; border-bottom: 1px solid #f5f5f5; cursor: pointer; }
-    .check-item input[type="checkbox"] { margin-right: 10px; margin-top: 3px; transform: scale(1.2); accent-color: #5F0080; }
-    .check-desc { font-size: 12px; color: #666; margin-top: 2px; }
-
-    /* 문서 스타일 */
-    .doc-paper { background: white; border: 1px solid #ddd; padding: 20px; box-shadow: 2px 2px 5px rgba(0,0,0,0.05); font-family: "Batang", "Serif"; position: relative; }
-    .doc-header { text-align: center; border-bottom: 2px double #333; margin-bottom: 15px; padding-bottom: 10px; }
-    .doc-title { font-size: 18px; font-weight: bold; color: #000; letter-spacing: 2px; }
-    .doc-table { width: 100%; border-collapse: collapse; font-size: 12px; margin-bottom: 15px; }
-    .doc-table th { background: #f7f7f7; border: 1px solid #888; padding: 6px; text-align: center; font-weight: bold; }
-    .doc-table td { border: 1px solid #888; padding: 6px; color: #333; }
-    .stamp-box { position: absolute; bottom: 20px; right: 20px; width: 50px; height: 50px; border: 3px solid #d32f2f; border-radius: 50%; color: #d32f2f; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 12px; transform: rotate(-15deg); opacity: 0.8; pointer-events: none; }
-    .highlight-bg { background: #fffde7; }
-
-    /* 채팅방 */
-    .chat-screen { background-color: #b2c7da; min-height: 100vh; display: flex; flex-direction: column; box-sizing: border-box; }
-    .chat-area { flex: 1; padding: 15px; overflow-y: auto; padding-bottom: 70px; }
-    .chat-date { text-align: center; font-size: 10px; color: #fff; background: rgba(0,0,0,0.1); padding: 3px 10px; border-radius: 10px; margin: 10px auto; width: fit-content; }
-    .chat-bubble-row { display: flex; margin-bottom: 10px; }
-    .chat-bubble-row.me { justify-content: flex-end; }
-    .chat-bubble { max-width: 70%; padding: 10px; border-radius: 10px; font-size: 14px; position: relative; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
-    .chat-bubble.you { background: white; color: #333; border-top-left-radius: 0; }
-    .chat-bubble.me { background: #5F0080; color: white; border-top-right-radius: 0; }
-    .chat-profile { width: 35px; height: 35px; background: #fff; border-radius: 50%; margin-right: 8px; display: flex; align-items: center; justify-content: center; font-size: 20px; }
-    .chat-name { font-size: 11px; color: #555; margin-bottom: 4px; margin-left: 2px; }
-    .chat-time { font-size: 9px; color: #555; align-self: flex-end; margin: 0 5px; }
-    .chat-input-bar { position: fixed; bottom: 0; left: 0; width: 100%; max-width: 600px; background: white; padding: 10px; display: flex; align-items: center; box-shadow: 0 -2px 5px rgba(0,0,0,0.05); box-sizing: border-box; }
-    .chat-input { flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 20px; background: #f8f8f8; margin-right: 10px; font-size: 14px; }
-    .chat-send-btn { background: #5F0080; color: white; border: none; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; }
-
-    /* Q&A & 모달 */
-    .qna-item { padding: 15px 0; border-bottom: 1px solid #eee; animation: slideDown 0.3s ease; }
-    .qna-tag { font-size: 11px; color: #888; margin-bottom: 4px; }
-    .qna-status { font-size: 11px; padding: 2px 6px; border-radius: 4px; }
-    .status-done { background: #e8f5e9; color: #2e7d32; }
-    .status-wait { background: #f5f5f5; color: #757575; }
-    .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 3000; display: none; align-items: center; justify-content: center; }
-    .modal-overlay.active { display: flex; }
-    .write-card { background: white; width: 90%; max-width: 500px; border-radius: 12px; padding: 20px; box-shadow: 0 5px 15px rgba(0,0,0,0.2); animation: slideUp 0.3s ease; }
-    .write-label { display: block; font-size: 12px; font-weight: bold; color: #555; margin-bottom: 5px; }
-    .write-input { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; margin-bottom: 15px; box-sizing: border-box; }
-    .write-textarea { width: 100%; height: 100px; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; margin-bottom: 15px; resize: none; box-sizing: border-box; }
-    @keyframes slideUp { from { transform: translateY(50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-    @keyframes slideDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
-    
-    /* 계산기 결과 */
-    .calc-input-group { margin-bottom: 15px; }
-    .calc-label { font-size: 13px; font-weight: bold; color: #555; display: block; margin-bottom: 5px; }
-    .calc-input { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 16px; text-align: right; box-sizing: border-box; }
-    .calc-result-box { background: #f0f4f8; padding: 20px; border-radius: 8px; text-align: center; display: none; margin-top: 20px; }
-    .calc-result-box.show { display: block; animation: fadeIn 0.5s; }
-    
-    /* 기타 */
-    .chip { display: inline-block; padding: 4px 8px; border-radius: 12px; font-size: 11px; background: #eee; color: #555; border: 1px solid #ddd; cursor: pointer; }
-    .input { display: flex; flex-direction: column; gap: 5px; font-size: 12px; font-weight: bold; color: #555; }
-    .input input { padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; }
-    .or { text-align:center; margin:15px 0; color:#aaa; font-size:12px; }
-    .oauth { text-align: center; gap: 4px; }
-    .logo-card { text-align:center; padding-top:40px; }
-    .vs-box { background: #f8f9fa; border-radius: 8px; padding: 15px; margin-bottom: 10px; }
-    .step-circle { display: inline-block; width: 20px; height: 20px; background: #5F0080; color: white; text-align: center; line-height: 20px; border-radius: 50%; font-size: 12px; margin-right: 5px; }
-  </style>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+  <title>Finale | 상속·세무 모바일 데모</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
 
-  <div id="menuOverlay" onclick="toggleMenu()"></div> 
+  <div id="menuOverlay" onclick="toggleMenu()"></div>
   
   <div id="writeModal" class="modal-overlay">
       <div class="write-card">
           <div class="hstack space-between mb-10">
-              <h3 class="title-sm">질문하기</h3>
-              <button onclick="closeQnaWrite()" style="border:none; background:none; font-size:20px;">✕</button>
+              <h3 style="margin:0;">질문하기</h3>
+              <button onclick="closeQnaWrite()" class="btn ghost" style="font-size:20px;">✕</button>
           </div>
-          <label class="write-label">카테고리</label>
-          <select id="qna-category" class="write-input"><option value="#상속세">상속세/증여세</option><option value="#부동산">부동산/등기</option><option value="#부채상속">빚 상속/한정승인</option><option value="#유류분">유류분/가족분쟁</option><option value="#기타">기타 문의</option></select>
-          <label class="write-label">제목</label>
-          <input type="text" id="qna-title" class="write-input" placeholder="궁금한 내용을 요약해주세요.">
-          <label class="write-label">내용</label>
-          <textarea id="qna-content" class="write-textarea" placeholder="자세한 상황을 적어주시면 전문가가 더 정확하게 답변드릴 수 있습니다."></textarea>
+          <div class="input-group">
+            <label class="text-xs bold muted">카테고리</label>
+            <select id="qna-category" class="input mt-10">
+                <option value="#상속세">상속세/증여세</option>
+                <option value="#부동산">부동산/등기</option>
+                <option value="#부채상속">빚 상속/한정승인</option>
+                <option value="#유류분">유류분/가족분쟁</option>
+                <option value="#기타">기타 문의</option>
+            </select>
+          </div>
+          <div class="input-group">
+            <label class="text-xs bold muted">제목</label>
+            <input type="text" id="qna-title" class="input mt-10" placeholder="궁금한 내용을 요약해주세요.">
+          </div>
+          <div class="input-group">
+            <label class="text-xs bold muted">내용</label>
+            <textarea id="qna-content" class="input mt-10" placeholder="자세한 상황을 적어주시면 전문가가 더 정확하게 답변드릴 수 있습니다."></textarea>
+          </div>
           <button class="btn primary full" onclick="submitQuestion()">등록하기</button>
       </div>
   </div>
 
   <aside id="sideMenu">
       <div class="menu-header">
-          <div style="display:flex; justify-content:space-between; align-items:center;">
+          <div class="hstack space-between">
             <h3 style="margin:0; font-size:16px;">김○○님, 안녕하세요</h3>
-            <button onclick="toggleMenu()" style="border:none; background:none; font-size:20px; cursor:pointer;">✕</button>
+            <button onclick="toggleMenu()" class="btn ghost" style="font-size:20px;">✕</button>
           </div>
-          <p style="margin:5px 0 0 0; font-size:12px; color:#888;">finale@example.com</p>
-          <div style="margin-top:15px;"><button class="btn primary small" style="width:100%;">로그아웃</button></div>
+          <p class="text-xs muted mt-10">finale@example.com</p>
+          <div class="mt-10"><button class="btn primary small full">로그아웃</button></div>
       </div>
       <ul class="menu-list">
-          <li><a href="#">📂 내 서류 보관함 <span class="badge-new">NEW</span></a></li>
-          <li><a href="#doc-checklist" style="cursor:pointer;" onclick="location.hash='#doc-checklist'; toggleMenu();">📋 필요 서류 체크리스트</a></li>
-          <li><a href="#qna-list" style="cursor:pointer;" onclick="location.hash='#qna-list'; toggleMenu();">🗣️ 상속 커뮤니티</a></li>
-          <li><a href="#guide-detail" style="cursor:pointer;" onclick="location.hash='#guide-detail'; toggleMenu();">❓ 이용 가이드</a></li>
+          <li><a href="#">📂 내 서류 보관함 <span class="badge">NEW</span></a></li>
+          <li><a href="#doc-checklist" onclick="toggleMenu()">📋 필요 서류 체크리스트</a></li>
+          <li><a href="#qna-list" onclick="toggleMenu()">🗣️ 상속 커뮤니티</a></li>
+          <li><a href="#guide-detail" onclick="toggleMenu()">❓ 이용 가이드</a></li>
           <li><a href="#">⚙️ 환경설정</a></li>
       </ul>
   </aside>
 
-  <header id="appbar" class="appbar" aria-label="상단 내비게이션 바">
-    <div class="hstack">
-        <button class="icon-btn" onclick="toggleMenu()">☰</button>
-        <button class="icon-btn" id="backBtn" aria-label="뒤로가기" onclick="history.back()" hidden>←</button>
-    </div>
-    <div class="brand-center">
-        <svg class="brand-logo-svg" viewBox="0 0 100 24" xmlns="http://www.w3.org/2000/svg">
-            <path d="M4 2h16v3H4zM6 6h2v14H6zM11 6h2v14h-2zM16 6h2v14h-2zM3 21h18v2H3z" fill="#5F0080"/>
-            <text x="30" y="20" font-family="serif" font-weight="bold" font-size="20" fill="#5F0080" letter-spacing="1">Finale</text>
-        </svg>
-    </div>
-    <div class="hstack">
-        <button class="icon-btn" aria-label="검색">🔍</button>
-        <button class="icon-btn" aria-label="알림">🔔</button>
-    </div>
+  <header class="appbar">
+    <button class="icon-btn" onclick="toggleMenu()">☰</button>
+    <div class="brand"><span class="logo">F</span> Finale</div>
+    <div class="spacer" style="flex:1;"></div>
+    <button class="icon-btn">🔍</button>
+    <button class="icon-btn">🔔</button>
   </header>
 
-  <main>
-    <section class="screen" id="login" data-title="로그인">
-      <div class="card logo-card">
-        <svg viewBox="0 0 100 100" width="80" height="80" style="margin-bottom:10px;">
-             <circle cx="50" cy="50" r="45" fill="#f3e5f5" />
-             <path d="M30 30h40v10H30zM35 45h5v30h-5zM47.5 45h5v30h-5zM60 45h5v30h-5zM25 80h50v5H25z" fill="#5F0080"/>
-        </svg>
-        <h1 class="title-lg" style="color:#5F0080; font-family:serif;">Finale</h1>
-        <p class="muted mt-6">복잡한 상속, 이제는 쉽고 간편하게</p>
-        <form id="loginForm" class="vstack gap-10 mt-10" autocomplete="off" style="text-align:left;" onsubmit="event.preventDefault(); location.hash='#home';">
-          <label class="input"><span>아이디(이메일)</span><input type="email" required placeholder="name@example.com" /></label>
-          <label class="input"><span>비밀번호</span><input type="password" required placeholder="••••••••" /></label>
-          <div class="right small"><a href="#" class="muted">아이디/비밀번호 찾기</a></div>
+  <main class="container">
+    
+    <section class="screen" id="login">
+      <div class="card" style="margin-top:40px; border:none; box-shadow:none; background:transparent; text-align:center;">
+        <div class="brand" style="font-size:32px; justify-content:center; margin-bottom:10px;"><span class="logo" style="width:36px; height:36px;">F</span> Finale</div>
+        <p class="muted text-sm">복잡한 상속, 이제는 쉽고 간편하게</p>
+      </div>
+      <div class="card">
+        <form onsubmit="location.hash='#home'; return false;" class="vstack gap-10">
+          <div class="input-group"><label class="text-xs bold muted">아이디</label><input type="email" class="input mt-10" required placeholder="name@example.com" /></div>
+          <div class="input-group"><label class="text-xs bold muted">비밀번호</label><input type="password" class="input mt-10" required placeholder="••••••••" /></div>
+          <div class="text-right text-xs"><a href="#" class="muted">아이디/비밀번호 찾기</a></div>
           <button class="btn primary full" type="submit">로그인</button>
         </form>
-        <div class="or">간편 로그인</div>
-        <div class="oauth center gap-4"><button class="chip">Kakao</button><button class="chip">Naver</button><button class="chip">Google</button></div>
-        <button id="goSignup" class="btn ghost full mt-10">회원가입</button>
+        <div class="text-center text-xs muted mb-10 mt-10">간편 로그인</div>
+        <div class="hstack gap-10" style="justify-content:center;">
+          <button class="btn small">Kakao</button>
+          <button class="btn small">Naver</button>
+          <button class="btn small">Google</button>
+        </div>
+        <button class="btn ghost full mt-10">회원가입</button>
       </div>
     </section>
 
-    <section class="screen" id="home" data-title="나의 상속 관리">
+    <section class="screen" id="home">
       <div class="card">
         <div class="hstack space-between">
-          <div><div class="muted tiny">김○○님 상속,</div><div class="title-sm">3단계 진행 중</div></div>
+          <div><div class="text-xs muted">김○○님 상속,</div><div class="bold">3단계 진행 중</div></div>
           <button class="btn ghost small">세부 정보</button>
         </div>
         <button class="btn primary full mt-10" onclick="location.hash='#choose'">새 상속 시작하기</button>
-        <div class="muted tiny mt-6">새로운 상속 접수, 지금 시작하지 않으면…</div>
+        <div class="text-xs muted mt-10 text-center">새로운 상속 접수, 지금 시작하지 않으면…</div>
       </div>
-      <div class="grid-4 shortcuts">
-        <a class="shortcut" href="#status"><span class="ic">📊</span><span>진행 현황</span></a>
-        <a class="shortcut" href="#assets"><span class="ic">💼</span><span>내 자산</span></a>
-        <a class="shortcut" href="#experts"><span class="ic">👥</span><span>전문가 연결</span></a>
-        <a class="shortcut" href="#mypage"><span class="ic">👤</span><span>마이페이지</span></a>
+      
+      <div class="grid-4" style="display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-bottom:16px;">
+        <a class="btn" style="flex-direction:column; gap:4px; height:auto; padding:10px;" href="#status"><span style="font-size:24px;">📊</span><span class="text-xs">현황</span></a>
+        <a class="btn" style="flex-direction:column; gap:4px; height:auto; padding:10px;" href="#assets"><span style="font-size:24px;">💼</span><span class="text-xs">자산</span></a>
+        <a class="btn" style="flex-direction:column; gap:4px; height:auto; padding:10px;" href="#experts"><span style="font-size:24px;">👥</span><span class="text-xs">전문가</span></a>
+        <a class="btn" style="flex-direction:column; gap:4px; height:auto; padding:10px;" href="#mypage"><span style="font-size:24px;">👤</span><span class="text-xs">마이</span></a>
       </div>
+
       <div class="card">
-        <div class="title-sm mb-10">간편 상속 가이드</div>
+        <div class="bold mb-10">간편 상속 가이드</div>
         <div class="hstack gap-10">
-            <a href="#guide-detail" class="grow" style="text-decoration:none;">
-                <div style="background:#f8f9fa; padding:15px; border-radius:8px; text-align:center;">
-                    <div style="font-size:24px;">📖</div><div class="bold mt-6" style="font-size:13px; color:#333;">초보자 가이드</div><div class="tiny muted">절차 A to Z</div>
-                </div>
+            <a href="#guide-detail" class="grow card" style="text-align:center; background:#f8f9fa; margin:0; box-shadow:none;">
+                <div style="font-size:24px;">📖</div><div class="bold text-sm mt-10">초보자 가이드</div><div class="text-xs muted">절차 A to Z</div>
             </a>
-            <a href="#doc-checklist" class="grow" style="text-decoration:none;">
-                <div style="background:#f8f9fa; padding:15px; border-radius:8px; text-align:center;">
-                    <div style="font-size:24px;">✅</div><div class="bold mt-6" style="font-size:13px; color:#333;">필요 서류</div><div class="tiny muted">상황별 체크리스트</div>
-                </div>
+            <a href="#doc-checklist" class="grow card" style="text-align:center; background:#f8f9fa; margin:0; box-shadow:none;">
+                <div style="font-size:24px;">✅</div><div class="bold text-sm mt-10">필요 서류</div><div class="text-xs muted">체크리스트</div>
             </a>
         </div>
       </div>
-      <div class="card">
-        <div class="hstack space-between">
-          <div class="title-sm">전문가 Q&A</div><a class="btn ghost small" href="#qna-list">더보기</a>
-        </div>
-        <p class="muted tiny mt-10">상속 착수, 어디서부터 시작해야 할까요?</p>
+      
+      <div class="card hstack space-between" onclick="location.hash='#qna-list'">
+          <div class="bold text-sm">전문가 Q&A <span class="text-xs muted" style="font-weight:normal;">1,204건의 질문</span></div>
+          <span class="text-xs">더보기 ></span>
       </div>
     </section>
 
-    <section class="screen" id="choose" data-title="서비스 선택">
+    <section class="screen" id="choose">
       <div class="vstack gap-10">
-        <a class="select-card" href="#legal"><div class="ic">⚖️</div><div class="select-title">법무 서비스</div><div class="select-desc">상속 확인, 등기, 유류분 등 법률 절차</div></a>
-        <a class="select-card" href="#tax"><div class="ic">🧾</div><div class="select-title">세무 서비스</div><div class="select-desc">상속세 계산, 신고 지원, 증여세 상담</div></a>
+        <a class="card hstack gap-20" href="#legal" style="text-decoration:none; color:inherit;">
+          <div style="font-size:36px;">⚖️</div>
+          <div><div class="bold text-sm" style="font-size:16px;">법무 서비스</div><div class="text-xs muted mt-10">상속 확인, 등기, 유류분 등 법률 절차</div></div>
+        </a>
+        <a class="card hstack gap-20" href="#tax" style="text-decoration:none; color:inherit;">
+          <div style="font-size:36px;">🧾</div>
+          <div><div class="bold text-sm" style="font-size:16px;">세무 서비스</div><div class="text-xs muted mt-10">상속세 계산, 신고 지원, 증여세 상담</div></div>
+        </a>
       </div>
     </section>
 
-    <section class="screen" id="legal" data-title="법무 서비스">
-      <ul class="list list-elev">
-        <li class="list-item"><div><div class="list-title">상속 재산 조회 및 분석</div><div class="list-desc">사망자 재산 현황을 한번에 파악하세요.</div></div><a href="#legal-property-sample" class="btn primary small" style="text-decoration:none; display:inline-block; text-align:center; line-height:28px;">시작하기</a></li>
-        <li class="list-item"><div><div class="list-title">상속인 확인 및 증명</div><div class="list-desc">상속인 확정 및 필요 서류를 안내해 드립니다.</div></div><a href="#legal-heir-sample" class="btn primary small" style="text-decoration:none; display:inline-block; text-align:center; line-height:28px;">시작하기</a></li>
-        <li class="list-item"><div><div class="list-title">상속등기 지원</div><div class="list-desc">부동산 상속 등기 절차, 쉽게 진행하세요.</div></div><a href="#legal-reg-sample" class="btn primary small" style="text-decoration:none; display:inline-block; text-align:center; line-height:28px;">시작하기</a></li>
-        <li class="list-item"><div><div class="list-title">유언/유류분 상담</div><div class="list-desc">유언장 작성 및 유류분 관련 법적 자문.</div></div><a href="#experts" class="btn ghost small" style="text-decoration:none; display:inline-block; text-align:center; line-height:28px;">전문가 연결</a></li>
-        <li class="list-item"><div><div class="list-title">사망신고 및 필요 서류 발급 가이드</div><div class="list-desc">사망 직후 필수 행정 절차 안내.</div></div><a href="#doc-checklist" class="btn ghost small" style="text-decoration:none; display:inline-block; text-align:center; line-height:28px;">상세 보기</a></li>
-      </ul>
-    </section>
-
-    <section class="screen" id="tax" data-title="세무 서비스">
-      <ul class="list list-elev">
-        <li class="list-item"><div><div class="list-title">상속세 시뮬레이션</div><div class="list-desc">간단한 정보 입력으로 예상 상속세 확인.</div></div><a href="#tax-calc" class="btn primary small" style="text-decoration:none; display:inline-block; text-align:center; line-height:28px;">계산하기</a></li>
-        <li class="list-item"><div><div class="list-title">상속세 신고 지원</div><div class="list-desc">상속세 신고에 필요한 서류 준비·절차 가이드.</div></div><a href="#tax-return-sample" class="btn primary small" style="text-decoration:none; display:inline-block; text-align:center; line-height:28px;">시작하기</a></li>
-        <li class="list-item"><div><div class="list-title">증여세 상담</div><div class="list-desc">상속 전에 미리 준비하는 절세 전략.</div></div><a href="#experts" class="btn ghost small" style="text-decoration:none; display:inline-block; text-align:center; line-height:28px;">전문가 연결</a></li>
-        <li class="list-item"><div><div class="list-title">취득세 등 기타 세금 안내</div><div class="list-desc">상속으로 인한 추가 세금 정보를 확인하세요.</div></div><a href="#doc-checklist" class="btn ghost small" style="text-decoration:none; display:inline-block; text-align:center; line-height:28px;">상세 보기</a></li>
-      </ul>
-    </section>
-
-    <section class="screen" id="tax-calc" data-title="상속세 계산기">
-        <div class="card mb-10"><h3 class="title-sm">📊 간편 상속세 시뮬레이션</h3><p class="tiny muted mt-6">자산과 부채를 입력하면 예상 세금을 알려드립니다.</p></div>
+    <section class="screen" id="legal">
+      <div class="hstack gap-10 mb-10"><button onclick="history.back()" class="btn ghost">←</button><h3 style="margin:0;">법무 서비스</h3></div>
+      <div class="vstack gap-10">
         <div class="card">
-            <div class="calc-input-group"><label class="calc-label">총 상속 자산 (원)</label><input type="text" id="calc-asset" class="calc-input" placeholder="예: 1,500,000,000" onkeyup="formatNumber(this)"></div>
-            <div class="calc-input-group"><label class="calc-label">총 부채 및 장례비용 (원)</label><input type="text" id="calc-debt" class="calc-input" placeholder="예: 100,000,000" onkeyup="formatNumber(this)"></div>
-            <div class="calc-input-group"><label class="calc-label">공제 금액 (일괄+배우자공제 가정)</label><input type="text" id="calc-deduction" class="calc-input" value="1,000,000,000" readonly style="background:#eee; color:#888;"><p class="tiny muted mt-6">* 배우자 및 자녀가 있는 경우 통상 10억 공제 적용</p></div>
-            <button class="btn primary full mt-10" onclick="calculateInheritanceTax()">예상 세금 계산하기</button>
-            <div id="calc-result" class="calc-result-box"><div style="font-size:14px; color:#666;">예상 납부 상속세</div><div id="calc-tax-amount" style="font-size:24px; font-weight:bold; color:#5F0080; margin:10px 0;">0원</div><div style="font-size:12px; color:#888; border-top:1px solid #ddd; padding-top:10px;">과세 표준: <span id="calc-base">0</span>원 <br> 적용 세율: <span id="calc-rate">0</span>% (누진공제 적용)</div></div>
+            <div class="bold">상속 재산 조회 및 분석</div>
+            <p class="text-xs muted">사망자 재산 현황을 한번에 파악하세요.</p>
+            <button class="btn primary small full mt-10" onclick="location.hash='#legal-property-sample'">시작하기</button>
         </div>
+        <div class="card">
+            <div class="bold">상속인 확인 및 증명</div>
+            <p class="text-xs muted">상속인 확정 및 필요 서류를 안내해 드립니다.</p>
+            <button class="btn primary small full mt-10" onclick="location.hash='#legal-heir-sample'">시작하기</button>
+        </div>
+        <div class="card">
+            <div class="bold">상속등기 지원</div>
+            <p class="text-xs muted">부동산 상속 등기 절차, 쉽게 진행하세요.</p>
+            <button class="btn primary small full mt-10" onclick="location.hash='#legal-reg-sample'">시작하기</button>
+        </div>
+      </div>
     </section>
 
-    <section class="screen" id="tax-return-sample" data-title="신고서 미리보기">
-        <div class="card mb-10"><h3 class="title-sm">📝 상속세 신고서 준비</h3><p class="tiny muted mt-6">국세청 법정 서식에 맞춰 자동 작성된 샘플입니다.</p></div>
+    <section class="screen" id="legal-property-sample">
+        <div class="hstack gap-10 mb-10"><button onclick="history.back()" class="btn ghost">←</button><h3 style="margin:0;">상속 재산 분석</h3></div>
+        <div class="card mb-10" style="background:#e8f5e9; border:none;"><div class="bold text-sm">✅ 조회 완료 (2025.10.12)</div><div class="text-xs muted">금융감독원 안심상속 원스톱 서비스 결과 기반</div></div>
         <div class="doc-paper">
-            <div class="doc-header"><div class="doc-title" style="font-size:16px;">상속세 과세표준신고 및<br>자진납부계산서</div><div style="font-size:10px; margin-top:5px;">[별지 제1호 서식]</div></div>
-            <table class="doc-table"><tr><th rowspan="2">피상속인</th><th>성명</th><td>김철수</td></tr><tr><th>주민번호</th><td>480101-*******</td></tr></table>
-            <p style="font-size:12px; font-weight:bold; margin-bottom:5px;">세액 계산 내용</p>
-            <table class="doc-table"><thead><tr><th>구분</th><th>금액 (원)</th></tr></thead><tbody><tr><td>① 상속재산가액</td><td style="text-align:right;">1,250,000,000</td></tr><tr><td>② 채무 및 비용</td><td style="text-align:right; color:red;">- 105,000,000</td></tr><tr class="highlight-bg"><td>⑥ 자진납부할 세액</td><td style="text-align:right; font-weight:bold; color:#5F0080;">18,430,000</td></tr></tbody></table>
-            <div class="tiny center mt-10" style="color:#666; line-height:1.6;">「상속세 및 증여세법」 제67조에 따라<br>위와 같이 신고 및 납부합니다.</div><div style="text-align:right; margin-top:20px; font-size:12px; font-weight:bold; padding-right:10px;">신고인: 이영희 (서명 또는 인)</div>
+            <div class="doc-header"><div class="doc-title">상속인 금융거래 조회결과</div><div style="font-size:10px;">문서번호: 2025-10-12-004</div></div>
+            <p class="bold text-xs mb-10">1. 피상속인(사망자) 정보</p>
+            <table class="doc-table"><tr><th>성명</th><td>김철수</td><th>주민번호</th><td>480101-1******</td></tr></table>
+            <p class="bold text-xs mb-10">2. 상세 조회 결과</p>
+            <table class="doc-table">
+                <thead><tr><th>기관명</th><th>계좌/상품</th><th>잔액/채무</th></tr></thead>
+                <tbody>
+                    <tr><td>신한은행</td><td>저축예금</td><td class="text-right text-blue">+ 50,000,000</td></tr>
+                    <tr><td>국민은행</td><td>주택청약</td><td class="text-right text-blue">+ 12,000,000</td></tr>
+                    <tr class="highlight-bg"><td>우리은행</td><td>신용대출</td><td class="text-right text-red">- 100,000,000</td></tr>
+                </tbody>
+            </table>
+            <div class="text-center bold text-sm mt-10">금 융 감 독 원 장</div>
+            <div class="stamp-box">인</div>
         </div>
-        <button class="btn primary full mt-10">세무 대리인에게 전송</button>
+        <button class="btn primary full">자산 확정 및 분석 요청</button>
     </section>
 
-    <section class="screen" id="legal-property-sample" data-title="상속 재산 분석">
-        <div class="card mb-10"><h3 class="title-sm">✅ 조회 완료 (2025.10.12)</h3><p class="tiny muted">금융감독원 안심상속 원스톱 서비스 결과 기반</p></div>
-        <div class="doc-paper"><div class="doc-header"><div class="doc-title">상속인 금융거래 조회결과</div></div><p style="font-size:12px; font-weight:bold; margin-bottom:5px;">1. 피상속인(사망자) 정보</p><table class="doc-table"><tr><th>성명</th><td>김철수</td><th>주민번호</th><td>480101-1******</td></tr></table><p style="font-size:12px; font-weight:bold; margin-bottom:5px;">2. 상세 조회 결과</p><table class="doc-table"><thead><tr><th>기관명</th><th>계좌/상품</th><th>잔액/채무</th></tr></thead><tbody><tr><td>신한은행</td><td>저축예금</td><td style="color:blue; text-align:right;">+ 50,000,000</td></tr><tr><td>국민은행</td><td>주택청약</td><td style="color:blue; text-align:right;">+ 12,000,000</td></tr><tr class="highlight-bg"><td>우리은행</td><td>신용대출</td><td style="color:red; text-align:right;">- 100,000,000</td></tr></tbody></table><div style="text-align:center; margin-top:20px; font-size:14px; font-weight:bold;">금 융 감 독 원 장</div><div class="stamp-box">인</div></div>
-        <button class="btn primary full mt-10">자산 확정 및 분석 요청</button>
+    <section class="screen" id="legal-heir-sample">
+        <div class="hstack gap-10 mb-10"><button onclick="history.back()" class="btn ghost">←</button><h3 style="margin:0;">상속인 확인</h3></div>
+        <div class="doc-paper">
+            <div class="doc-header"><div class="doc-title">가족관계증명서 (상세)</div></div>
+            <p class="text-xs mb-10">[본인] 피상속인</p>
+            <table class="doc-table"><tr><th>성명</th><td>김철수</td><th>출생연월일</th><td>1948.01.01</td></tr></table>
+            <p class="text-xs mb-10">[가족] 상속인 명단</p>
+            <table class="doc-table">
+                <thead><tr><th>구분</th><th>성명</th><th>상속지분</th></tr></thead>
+                <tbody>
+                    <tr class="highlight-bg"><td>배우자</td><td>이영희</td><td>1.5 / 3.5</td></tr>
+                    <tr class="highlight-bg"><td>자녀</td><td>김아들</td><td>1.0 / 3.5</td></tr>
+                    <tr class="highlight-bg"><td>자녀</td><td>김딸</td><td>1.0 / 3.5</td></tr>
+                </tbody>
+            </table>
+            <div class="text-center bold text-sm mt-10">법 원 행 정 처 장</div>
+            <div class="stamp-box">인</div>
+        </div>
+        <button class="btn primary full">상속 지분 확정</button>
     </section>
 
-    <section class="screen" id="legal-heir-sample" data-title="상속인 확인">
-        <div class="card mb-10"><div class="hstack space-between"><h3 class="title-sm">상속 순위 확인</h3><span class="chip" style="background:#5F0080; color:white;">1순위 확정</span></div></div>
-        <div class="doc-paper"><div class="doc-header"><div class="doc-title">가족관계증명서 (상세)</div></div><p style="font-size:12px; margin-bottom:5px;">[본인] 피상속인</p><table class="doc-table"><tr><th>성명</th><td>김철수</td><th>출생연월일</th><td>1948.01.01</td></tr></table><p style="font-size:12px; margin-bottom:5px;">[가족] 상속인 명단</p><table class="doc-table"><thead><tr><th>구분</th><th>성명</th><th>상속지분</th></tr></thead><tbody><tr class="highlight-bg"><td>배우자</td><td>이영희</td><td>1.5 / 3.5</td></tr><tr class="highlight-bg"><td>자녀</td><td>김아들</td><td>1.0 / 3.5</td></tr></tbody></table><div style="text-align:center; margin-top:20px; font-size:14px; font-weight:bold;">법 원 행 정 처 장</div><div class="stamp-box">인</div></div>
-        <div class="hstack gap-10 mt-10"><button class="btn ghost full">수정 요청</button><button class="btn primary full">상속 지분 확정</button></div>
+    <section class="screen" id="legal-reg-sample">
+        <div class="hstack gap-10 mb-10"><button onclick="history.back()" class="btn ghost">←</button><h3 style="margin:0;">상속 등기</h3></div>
+        <div class="doc-paper">
+            <div class="doc-header"><div class="doc-title">소유권이전등기신청</div><div style="font-size:11px;">(상속)</div></div>
+            <table class="doc-table">
+                <tr><th>부동산 표시</th><td>서울시 서초구 반포동... <br> 반포자이 101동 101호</td></tr>
+                <tr><th>등기 원인</th><td>2025년 10월 1일 상속</td></tr>
+                <tr><th>등기 목적</th><td>소유권 이전</td></tr>
+            </table>
+            <p class="bold text-xs mb-10">신청인(권리자)</p>
+            <table class="doc-table"><tr><th>성명</th><td>이영희 외 2명</td></tr><tr><th>주소</th><td>서울시 서초구...</td></tr></table>
+            <div class="vstack gap-4" style="margin-top:10px; border:1px dashed #888; padding:10px; font-size:11px; color:#555;">
+                <div>[첨부 서류]</div><div>☑ 토지대장 및 건축물대장</div><div>☑ 상속재산분할협의서</div><div>☑ 취득세영수필확인서</div>
+            </div>
+        </div>
+        <button class="btn primary full">등기 전문가에게 전송</button>
     </section>
 
-    <section class="screen" id="legal-reg-sample" data-title="상속 등기">
-        <div class="card mb-10"><h3 class="title-sm">부동산 등기 준비</h3></div>
-        <div class="doc-paper"><div class="doc-header"><div class="doc-title">소유권이전등기신청</div><div style="font-size:11px;">(상속)</div></div><table class="doc-table"><tr><th>부동산의 표시</th><td>서울시 서초구 반포동...</td></tr><tr><th>등기 원인</th><td>2025년 10월 1일 상속</td></tr></table><div class="vstack gap-4" style="margin-top:10px; border:1px dashed #888; padding:10px; font-size:11px; color:#555;"><div>[첨부 서류]</div><div>☑ 토지대장 및 건축물대장</div><div>☑ 상속재산분할협의서</div></div></div>
-        <button class="btn primary full mt-10">등기 전문가에게 전송</button>
+    <section class="screen" id="tax">
+      <div class="hstack gap-10 mb-10"><button onclick="history.back()" class="btn ghost">←</button><h3 style="margin:0;">세무 서비스</h3></div>
+      <div class="vstack gap-10">
+        <div class="card">
+            <div class="bold">상속세 시뮬레이션</div>
+            <p class="text-xs muted">간단한 정보 입력으로 예상 상속세 확인.</p>
+            <button class="btn primary small full mt-10" onclick="location.hash='#tax-calc'">계산하기</button>
+        </div>
+        <div class="card">
+            <div class="bold">상속세 신고 지원</div>
+            <p class="text-xs muted">상속세 신고에 필요한 서류 준비·절차 가이드.</p>
+            <button class="btn primary small full mt-10" onclick="location.hash='#tax-return-sample'">시작하기</button>
+        </div>
+      </div>
     </section>
 
-    <section class="screen" id="doc-checklist" data-title="필요 서류 안내">
-        <div class="card" style="margin-bottom:15px;"><h3 class="title-sm">어떤 서류가 필요하신가요?</h3><p class="tiny muted mt-6">상황별 탭을 눌러 확인하세요.</p></div>
-        <div class="hstack gap-4 mb-10" style="overflow-x:auto; white-space:nowrap; padding-bottom:5px;">
+    <section class="screen" id="tax-calc">
+       <div class="hstack gap-10 mb-10"><button onclick="history.back()" class="btn ghost">←</button><h3 style="margin:0;">상속세 계산기</h3></div>
+       <div class="card">
+           <div class="input-group">
+               <label class="text-xs bold muted">총 상속 자산 (원)</label>
+               <input type="text" id="calc-asset" class="input mt-10" placeholder="예: 1,500,000,000" onkeyup="formatNumber(this)">
+           </div>
+           <div class="input-group">
+               <label class="text-xs bold muted">총 부채 및 장례비용 (원)</label>
+               <input type="text" id="calc-debt" class="input mt-10" placeholder="예: 100,000,000" onkeyup="formatNumber(this)">
+           </div>
+           <div class="input-group">
+               <label class="text-xs bold muted">공제 금액 (일괄+배우자공제 가정)</label>
+               <input type="text" id="calc-deduction" class="input mt-10" value="1,000,000,000" readonly style="background:#eee; color:#888;">
+               <p class="text-xs muted mt-10">* 배우자 및 자녀가 있는 경우 통상 10억 공제</p>
+           </div>
+           <button class="btn primary full" onclick="calculateInheritanceTax()">예상 세금 계산하기</button>
+           
+           <div id="calc-result" style="display:none; margin-top:20px; text-align:center; background:#f0f4f8; padding:20px; border-radius:10px;">
+               <div class="text-xs muted">예상 납부 상속세</div>
+               <div id="calc-tax-amount" class="bold" style="font-size:24px; color:var(--brand); margin:10px 0;">0원</div>
+               <div class="text-xs muted" style="border-top:1px solid #ddd; padding-top:10px;">과세 표준: <span id="calc-base">0</span>원 <br> (누진 공제 적용됨)</div>
+           </div>
+       </div>
+    </section>
+
+    <section class="screen" id="tax-return-sample">
+        <div class="hstack gap-10 mb-10"><button onclick="history.back()" class="btn ghost">←</button><h3 style="margin:0;">신고서 미리보기</h3></div>
+        <div class="card mb-10" style="background:#fff3e0; border:none;"><div class="bold text-sm">📝 자동 작성된 샘플</div><div class="text-xs muted">국세청 법정 서식 [별지 제1호] 기준</div></div>
+        <div class="doc-paper">
+            <div class="doc-header"><div class="doc-title">상속세 과세표준신고 및<br>자진납부계산서</div></div>
+            <table class="doc-table"><tr><th rowspan="2">피상속인</th><th>성명</th><td>김철수</td></tr><tr><th>주민번호</th><td>480101-*******</td></tr></table>
+            <p class="bold text-xs mb-10">세액 계산 내용</p>
+            <table class="doc-table">
+                <thead><tr><th>구분</th><th>금액 (원)</th></tr></thead>
+                <tbody>
+                    <tr><td>① 상속재산가액</td><td class="text-right">1,250,000,000</td></tr>
+                    <tr><td>② 채무/비용</td><td class="text-right text-red">- 105,000,000</td></tr>
+                    <tr><td>③ 상속공제액</td><td class="text-right text-red">- 1,000,000,000</td></tr>
+                    <tr class="highlight-bg"><td>④ 과세표준</td><td class="text-right bold">145,000,000</td></tr>
+                    <tr><td>⑤ 산출세액</td><td class="text-right">19,000,000</td></tr>
+                    <tr class="highlight-bg"><td class="bold">⑥ 납부할 세액</td><td class="text-right bold" style="color:var(--brand);">18,430,000</td></tr>
+                </tbody>
+            </table>
+            <div class="text-center text-xs mt-10" style="color:#666;">위와 같이 신고 및 납부합니다.<br>2025년 10월 12일</div>
+            <div class="text-right bold text-xs mt-10">신고인: 이영희 (인)</div>
+        </div>
+        <button class="btn primary full">세무 대리인에게 전송</button>
+    </section>
+
+    <section class="screen" id="doc-checklist">
+        <div class="hstack gap-10 mb-10"><button onclick="history.back()" class="btn ghost">←</button><h3 style="margin:0;">필요 서류 체크리스트</h3></div>
+        <div class="check-tab-container">
              <button class="check-tab-btn active" onclick="showTab('common')">공통 필수</button>
              <button class="check-tab-btn" onclick="showTab('estate')">부동산 등기</button>
              <button class="check-tab-btn" onclick="showTab('bank')">금융/예금</button>
              <button class="check-tab-btn" onclick="showTab('giveup')">한정승인/포기</button>
         </div>
-        <div class="card" style="min-height: 400px;">
-            <div id="tab-common" class="check-content active"><div class="check-group"><div class="check-group-title">📋 모든 상속 절차 공통</div><label class="check-item"><input type="checkbox"><div><div class="bold">피상속인 기본증명서 (상세)</div><div class="check-desc">주민번호 공개 필수</div></div></label><label class="check-item"><input type="checkbox"><div><div class="bold">피상속인 가족관계증명서 (상세)</div></div></label><label class="check-item"><input type="checkbox"><div><div class="bold">피상속인 주민등록 말소자초본</div><div class="check-desc">과거 주소 변동 내역 전체 포함</div></div></label><label class="check-item"><input type="checkbox"><div><div class="bold">상속인 전원 기본증명서 (상세)</div></div></label><label class="check-item"><input type="checkbox"><div><div class="bold">상속인 전원 인감증명서</div><div class="check-desc">3개월 이내 발급분</div></div></label><label class="check-item"><input type="checkbox"><div><div class="bold">상속인 전원 신분증 사본</div></div></label></div></div>
-            <div id="tab-estate" class="check-content"><div class="check-group"><div class="check-group-title">🏠 부동산 상속 등기 시</div><label class="check-item"><input type="checkbox"><div><div class="bold">토지/임야/건축물 대장</div><div class="check-desc">정부24 발급</div></div></label><label class="check-item"><input type="checkbox"><div><div class="bold">취득세 신고서 및 납부확인서</div><div class="check-desc">관할 구청 세무과</div></div></label><label class="check-item"><input type="checkbox"><div><div class="bold">국민주택채권 매입필증</div><div class="check-desc">은행 발행</div></div></label><label class="check-item"><input type="checkbox"><div><div class="bold">상속재산분할협의서</div><div class="check-desc">전원 인감 날인 필수</div></div></label></div></div>
-            <div id="tab-bank" class="check-content"><div class="check-group"><div class="check-group-title">💰 예금/보험금 찾을 때</div><label class="check-item"><input type="checkbox"><div><div class="bold">금융거래조회신청서 (상속인용)</div></div></label><label class="check-item"><input type="checkbox"><div><div class="bold">상속재산분할협의서 (금융기관용)</div><div class="check-desc">은행마다 양식이 다를 수 있음</div></div></label><label class="check-item"><input type="checkbox"><div><div class="bold">통장 실물 또는 도장</div><div class="check-desc">없는 경우 분실신고 병행</div></div></label></div></div>
-            <div id="tab-giveup" class="check-content"><div class="check-group"><div class="check-group-title">⚖️ 빚이 더 많을 때</div><label class="check-item"><input type="checkbox"><div><div class="bold">상속포기/한정승인 심판청구서</div><div class="check-desc">가정법원 제출</div></div></label><label class="check-item"><input type="checkbox"><div><div class="bold">상속재산목록</div><div class="check-desc">적극재산 및 소극재산(빚) 기재</div></div></label><label class="check-item"><input type="checkbox"><div><div class="bold">부채증명서</div><div class="check-desc">각 채권자(은행/카드사) 발급</div></div></label></div></div>
-            <div class="mt-10 center"><button class="btn primary full" onclick="alert('선택한 목록이 저장되었습니다!')">체크리스트 저장하기</button></div>
+        <div class="card mt-10" style="min-height:400px;">
+            <div id="tab-common" class="check-content active">
+                <div class="bold text-sm mb-10" style="color:var(--brand);">📋 모든 상속 절차 공통</div>
+                <div class="check-item"><label class="hstack grow"><input type="checkbox"><div><div class="bold text-sm">피상속인 기본증명서 (상세)</div><div class="text-xs muted">주민번호 공개 필수</div></div></label></div>
+                <div class="check-item"><label class="hstack grow"><input type="checkbox"><div><div class="bold text-sm">피상속인 가족관계증명서 (상세)</div></div></label></div>
+                <div class="check-item"><label class="hstack grow"><input type="checkbox"><div><div class="bold text-sm">피상속인 주민등록 말소자초본</div><div class="text-xs muted">주소 변동 내역 포함</div></div></label></div>
+                <div class="check-item"><label class="hstack grow"><input type="checkbox"><div><div class="bold text-sm">상속인 전원 인감증명서</div></div></label></div>
+                <div class="check-item"><label class="hstack grow"><input type="checkbox"><div><div class="bold text-sm">상속인 전원 신분증 사본</div></div></label></div>
+            </div>
+            <div id="tab-estate" class="check-content">
+                <div class="bold text-sm mb-10" style="color:var(--brand);">🏠 부동산 상속 등기 시</div>
+                <div class="check-item"><label class="hstack grow"><input type="checkbox"><div><div class="bold text-sm">토지/건축물 대장</div></div></label></div>
+                <div class="check-item"><label class="hstack grow"><input type="checkbox"><div><div class="bold text-sm">취득세 신고서 및 납부확인서</div></div></label></div>
+                <div class="check-item"><label class="hstack grow"><input type="checkbox"><div><div class="bold text-sm">국민주택채권 매입필증</div></div></label></div>
+                <div class="check-item"><label class="hstack grow"><input type="checkbox"><div><div class="bold text-sm">상속재산분할협의서</div><div class="text-xs muted">인감 날인 필수</div></div></label></div>
+            </div>
+            <div id="tab-bank" class="check-content">
+                <div class="bold text-sm mb-10" style="color:var(--brand);">💰 예금/보험금 찾을 때</div>
+                <div class="check-item"><label class="hstack grow"><input type="checkbox"><div><div class="bold text-sm">금융거래조회신청서</div></div></label></div>
+                <div class="check-item"><label class="hstack grow"><input type="checkbox"><div><div class="bold text-sm">은행별 상속 청구서</div></div></label></div>
+                <div class="check-item"><label class="hstack grow"><input type="checkbox"><div><div class="bold text-sm">통장 실물 및 도장</div></div></label></div>
+            </div>
+            <div id="tab-giveup" class="check-content">
+                <div class="bold text-sm mb-10" style="color:var(--brand);">⚖️ 빚이 더 많을 때</div>
+                <div class="check-item"><label class="hstack grow"><input type="checkbox"><div><div class="bold text-sm">상속포기/한정승인 심판청구서</div></div></label></div>
+                <div class="check-item"><label class="hstack grow"><input type="checkbox"><div><div class="bold text-sm">상속재산목록</div><div class="text-xs muted">적극재산 및 소극재산(빚)</div></div></label></div>
+                <div class="check-item"><label class="hstack grow"><input type="checkbox"><div><div class="bold text-sm">부채증명서</div></div></label></div>
+            </div>
+            <div class="mt-10"><button class="btn primary full" onclick="alert('저장되었습니다!')">체크리스트 저장</button></div>
         </div>
     </section>
 
-    <section class="screen" id="experts" data-title="전문가 연결">
-        <div class="card" style="background:#f8f9fa;"><p class="tiny muted">김○○님 상황에 딱 맞는</p><h3 class="title-sm">상속 전문 파트너를 추천해 드립니다.</h3></div>
-        <div class="vstack gap-10 mt-10">
-            <div class="card"><div class="hstack gap-10"><div style="width:50px; height:50px; background:#eee; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:24px;">👨‍⚖️</div><div class="grow"><div class="bold">김법무 변호사</div><div class="tiny muted">법무법인 피날레 · 경력 15년</div><div class="chip" style="margin-top:5px; font-size:10px;">상속등기 전문</div></div></div><p class="tiny mt-10 muted">"복잡한 등기 절차, 서류 준비부터 등기까지 한 번에 해결해 드립니다."</p><div class="hstack gap-10 mt-10"><button class="btn ghost small grow">프로필 보기</button><a href="#chat-lawyer" class="btn primary small grow" style="text-decoration:none; display:flex; align-items:center; justify-content:center;">상담 신청</a></div></div>
-            <div class="card"><div class="hstack gap-10"><div style="width:50px; height:50px; background:#eee; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:24px;">👩‍💼</div><div class="grow"><div class="bold">이세무 세무사</div><div class="tiny muted">세무회계 더함 · 경력 10년</div><div class="chip" style="margin-top:5px; font-size:10px;">상속세 절세</div></div></div><p class="tiny mt-10 muted">"최대 40% 절세 사례 보유. 사전 증여 전략까지 꼼꼼하게 챙겨드립니다."</p><div class="hstack gap-10 mt-10"><button class="btn ghost small grow">프로필 보기</button><a href="#chat-tax" class="btn primary small grow" style="text-decoration:none; display:flex; align-items:center; justify-content:center;">상담 신청</a></div></div>
-        </div>
+    <section class="screen" id="experts">
+         <div class="card" style="background:var(--secondary-bg); border:none;">
+             <p class="text-xs muted">김○○님 상황에 딱 맞는</p>
+             <h3 class="bold text-sm">상속 전문 파트너를 추천해 드립니다.</h3>
+         </div>
+         <div class="vstack gap-10">
+             <div class="card">
+                 <div class="hstack gap-10">
+                     <div class="chat-profile" style="background:#eee;">👨‍⚖️</div>
+                     <div class="grow">
+                         <div class="bold">김법무 변호사</div>
+                         <div class="text-xs muted">법무법인 피날레 · 경력 15년</div>
+                         <span class="tag">상속등기 전문</span>
+                     </div>
+                 </div>
+                 <p class="text-xs muted mt-10">"복잡한 등기 절차, 서류 준비부터 등기까지 해결해 드립니다."</p>
+                 <div class="hstack gap-10 mt-10">
+                     <button class="btn ghost small grow">프로필</button>
+                     <button class="btn primary small grow" onclick="location.hash='#chat-lawyer'">상담 신청</button>
+                 </div>
+             </div>
+             <div class="card">
+                 <div class="hstack gap-10">
+                     <div class="chat-profile" style="background:#eee;">👩‍💼</div>
+                     <div class="grow">
+                         <div class="bold">이세무 세무사</div>
+                         <div class="text-xs muted">세무회계 더함 · 경력 10년</div>
+                         <span class="tag">상속세 절세</span>
+                     </div>
+                 </div>
+                 <p class="text-xs muted mt-10">"최대 40% 절세 사례 보유. 사전 증여 전략까지."</p>
+                 <div class="hstack gap-10 mt-10">
+                     <button class="btn ghost small grow">프로필</button>
+                     <button class="btn primary small grow" onclick="location.hash='#chat-tax'">상담 신청</button>
+                 </div>
+             </div>
+         </div>
     </section>
 
-    <section class="screen chat-screen" id="chat-lawyer" data-title="김법무 변호사" data-show-bottomnav="false">
+    <section class="screen chat-screen" id="chat-lawyer">
+        <div class="appbar" style="background:white;">
+            <button onclick="history.back()" class="icon-btn">←</button>
+            <div class="bold">김법무 변호사</div>
+        </div>
         <div class="chat-area" id="msg-area-lawyer">
             <div class="chat-date">2025년 10월 12일</div>
-            <div class="chat-bubble-row you"><div class="chat-profile">👨‍⚖️</div><div><div class="chat-name">김법무 변호사</div><div class="hstack"><div class="chat-bubble you">안녕하세요. 법무법인 피날레 김법무 변호사입니다.<br>상속 등기나 법률 절차와 관련해 궁금한 점을 남겨주시면 확인 후 답변드리겠습니다.</div><div class="chat-time">오전 10:00</div></div></div></div>
+            <div class="chat-bubble-row you">
+                <div class="chat-profile">👨‍⚖️</div>
+                <div><div class="chat-name text-xs muted mb-10">김법무 변호사</div>
+                <div class="chat-bubble you">안녕하세요. 법무법인 피날레 김법무 변호사입니다.<br>상속 등기나 법률 절차와 관련해 궁금한 점을 남겨주세요.</div></div>
+            </div>
         </div>
-        <div class="chat-input-bar"><input type="text" class="chat-input" id="input-lawyer" placeholder="메시지를 입력하세요..." onkeypress="handleEnter(event, 'lawyer')"><button class="chat-send-btn" onclick="sendMessage('lawyer')">➤</button></div>
+        <div class="chat-input-bar">
+            <input type="text" class="input" id="input-lawyer" placeholder="메시지 입력" onkeypress="handleEnter(event, 'lawyer')">
+            <button class="chat-send-btn" onclick="sendMessage('lawyer')">➤</button>
+        </div>
     </section>
 
-    <section class="screen chat-screen" id="chat-tax" data-title="이세무 세무사" data-show-bottomnav="false">
+    <section class="screen chat-screen" id="chat-tax">
+        <div class="appbar" style="background:white;">
+            <button onclick="history.back()" class="icon-btn">←</button>
+            <div class="bold">이세무 세무사</div>
+        </div>
         <div class="chat-area" id="msg-area-tax">
             <div class="chat-date">2025년 10월 12일</div>
-            <div class="chat-bubble-row you"><div class="chat-profile">👩‍💼</div><div><div class="chat-name">이세무 세무사</div><div class="hstack"><div class="chat-bubble you">반갑습니다, 김○○님.<br>상속세 신고나 증여세 관련 절세 전략에 대해 무엇이든 물어보세요.</div><div class="chat-time">오전 10:05</div></div></div></div>
+            <div class="chat-bubble-row you">
+                <div class="chat-profile">👩‍💼</div>
+                <div><div class="chat-name text-xs muted mb-10">이세무 세무사</div>
+                <div class="chat-bubble you">반갑습니다, 김○○님.<br>상속세 신고나 증여세 관련 절세 전략에 대해 무엇이든 물어보세요.</div></div>
+            </div>
         </div>
-        <div class="chat-input-bar"><input type="text" class="chat-input" id="input-tax" placeholder="메시지를 입력하세요..." onkeypress="handleEnter(event, 'tax')"><button class="chat-send-btn" onclick="sendMessage('tax')">➤</button></div>
+        <div class="chat-input-bar">
+            <input type="text" class="input" id="input-tax" placeholder="메시지 입력" onkeypress="handleEnter(event, 'tax')">
+            <button class="chat-send-btn" onclick="sendMessage('tax')">➤</button>
+        </div>
     </section>
 
-    <section class="screen" id="status" data-title="진행 현황"><div class="card"><h3 class="title-sm mb-10">김철수님 상속 진행률 40%</h3><div class="progress-bar" style="background:#eee; height:8px; border-radius:4px; overflow:hidden;"><div style="width:40%; background:#5F0080; height:100%;"></div></div><p class="tiny muted mt-6">예상 완료일: 2025. 12. 31</p></div><div class="vstack gap-10 mt-10"><div class="card" style="border-left: 4px solid #5F0080;"><div class="hstack space-between"><span style="font-weight:bold; color:#5F0080;">Step 1. 사망신고</span><span class="chip">완료</span></div><p class="tiny muted mt-6">2025. 10. 01 처리 완료</p></div><div class="card" style="border-left: 4px solid #5F0080; background:#fdfaff;"><div class="hstack space-between"><span style="font-weight:bold;">Step 2. 안심상속 원스톱 조회</span><span class="chip" style="background:#5F0080; color:white;">진행 중</span></div><p class="tiny mt-6">금융감독원에서 자산 내역을 조회하고 있습니다.<br>(약 2주 소요 예정)</p><button class="btn primary small full mt-10">조회 결과 확인하기</button></div><div class="card" style="opacity: 0.6;"><div class="hstack space-between"><span style="font-weight:bold;">Step 3. 상속세 신고</span><span class="chip">대기</span></div><p class="tiny muted mt-6">자산 확정 후 세무사가 배정될 예정입니다.</p></div></div></section>
-    <section class="screen" id="assets" data-title="내 자산"><div class="card" style="background: linear-gradient(135deg, #5F0080, #3a004d); color: white;"><p class="tiny opacity-70">추정 상속 재산 가액</p><h2 class="title-lg mt-6">12억 5,000만원</h2><div class="hstack space-between mt-10 tiny opacity-70"><span>자산 +13.5억</span><span>채무 -1.0억</span></div></div><div class="vstack gap-10 mt-10"><div class="card"><div class="hstack gap-10"><div class="ic">🏢</div><div class="grow"><div class="bold">반포자이 아파트 84㎡</div><div class="tiny muted">서울 서초구 · 아파트</div></div><div class="bold">11억 2,000만원</div></div></div><div class="card"><div class="hstack gap-10"><div class="ic">💰</div><div class="grow"><div class="bold">국민은행 주택청약</div><div class="tiny muted">예금/신탁</div></div><div class="bold">5,000만원</div></div></div><div class="card" style="border:1px solid #ffebeb;"><div class="hstack gap-10"><div class="ic">📉</div><div class="grow"><div class="bold" style="color:red;">우리은행 신용대출</div><div class="tiny muted">금융 채무</div></div><div class="bold" style="color:red;">-1억 0,000만원</div></div></div></div></section>
-    <section class="screen" id="mypage" data-title="마이페이지"><div class="card"><div class="hstack gap-10"><div style="width:50px; height:50px; background:#eee; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:24px;">👤</div><div><div class="bold">김○○님</div><div class="tiny muted">finale@example.com</div></div></div></div><ul class="list list-elev mt-10"><li class="list-item"><div>내 정보 수정</div><button class="btn ghost small">></button></li><li class="list-item"><div>알림 설정</div><button class="btn ghost small">ON</button></li><li class="list-item"><div>고객센터</div><button class="btn ghost small">></button></li><li class="list-item"><div>약관 및 정책</div><button class="btn ghost small">></button></li></ul></section>
-    <section class="screen" id="guide-detail" data-title="상속 가이드"><div class="card"><h2 class="title-lg mb-10">왜 Finale인가요?</h2><p class="muted">대한민국 평균 상속 처리 기간 6개월.<br>복잡한 절차, 이제 3단계로 끝내세요.</p></div><h3 class="title-sm mt-10 ml-5">🆚 절차 비교</h3><div class="vs-box mt-6"><div class="bold mb-6">😓 일반적인 상속 절차</div><div class="vstack gap-4 tiny muted"><div>1. 사망신고 (주민센터)</div><div>2. 안심상속 원스톱 서비스 신청</div><div>3. 금융/부동산 재산 조회 (2주 소요)</div><div>4. 상속재산분할협의서 작성</div><div>5. 상속세 신고 및 납부</div></div></div><button class="btn primary full mt-10">무료로 시작하기</button></section>
-    
-    <section class="screen" id="qna-list" data-title="전문가 Q&A">
-        <div class="hstack space-between mb-10" style="padding:0 5px;">
-            <h3 class="title-sm">전체 질문 (1,204)</h3>
+    <section class="screen" id="qna-list">
+        <div class="hstack space-between mb-10">
+            <h3 style="margin:0;">전문가 Q&A</h3>
             <button class="btn primary small" onclick="openQnaWrite()">✏️ 질문하기</button>
         </div>
-        <div class="card" style="padding:0;" id="qna-container">
-            <div class="qna-item" style="padding:15px;"><div class="hstack space-between"><span class="qna-tag">#부채상속 #한정승인</span><span class="qna-status status-done">답변완료</span></div><div class="bold mt-6">아버지 빚이 더 많은 것 같은데 어떡하죠?</div><div class="tiny muted mt-6">상속포기랑 한정승인 중에 뭘 해야 할지 모르겠습니다...</div><div class="hstack gap-10 mt-6 tiny"><span style="color:#5F0080;">김법무 변호사 답변</span><span class="muted">2025.10.12</span></div></div>
-            <div class="qna-item" style="padding:15px;"><div class="hstack space-between"><span class="qna-tag">#상속세 #공제한도</span><span class="qna-status status-done">답변완료</span></div><div class="bold">배우자 공제 30억까지 가능한가요?</div><div class="tiny muted mt-6">어머니가 살아계신데 상속세가 얼마나 나올지 궁금합니다.</div><div class="hstack gap-10 mt-6 tiny"><span style="color:#5F0080;">이세무 세무사 답변</span><span class="muted">2025.10.11</span></div></div>
+        <div class="vstack gap-10" id="qna-container">
+            <div class="card">
+                <div class="hstack space-between mb-10"><span class="tag">#부채상속</span><span class="status-done">답변완료</span></div>
+                <div class="bold">아버지 빚이 더 많은 것 같은데 어떡하죠?</div>
+                <div class="text-xs muted mt-10">상속포기랑 한정승인 중에 고민입니다.</div>
+                <div class="hstack gap-10 mt-10"><span class="text-xs" style="color:var(--brand);">김법무 변호사 답변</span></div>
+            </div>
+             <div class="card">
+                <div class="hstack space-between mb-10"><span class="tag">#상속세</span><span class="status-done">답변완료</span></div>
+                <div class="bold">배우자 공제 30억까지 가능한가요?</div>
+                <div class="text-xs muted mt-10">어머니가 살아계신데 세금이 얼마나 나올까요?</div>
+                <div class="hstack gap-10 mt-10"><span class="text-xs" style="color:var(--brand);">이세무 세무사 답변</span></div>
+            </div>
         </div>
     </section>
+    
+    <section class="screen" id="status"><div class="card"><div class="bold">진행 현황</div><div class="text-xs muted mt-10">현재 진행중인 단계가 표시됩니다.</div></div></section>
+    <section class="screen" id="assets"><div class="card"><div class="bold">내 자산</div><div class="text-xs muted mt-10">추정 상속 재산: 12억 5천만원</div></div></section>
+    <section class="screen" id="mypage"><div class="card"><div class="bold">마이페이지</div><div class="text-xs muted mt-10">내 정보 및 설정</div></div></section>
+
   </main>
 
-  <nav id="tabbar" class="tabbar" aria-label="하단 탭바">
-    <a href="#home" onclick="location.hash='#home'" class="tab active"><span class="ic">🏠</span><span>홈</span></a>
-    <a href="#status" onclick="location.hash='#status'" class="tab"><span class="ic">📊</span><span>진행 현황</span></a>
-    <a href="#assets" onclick="location.hash='#assets'" class="tab"><span class="ic">💼</span><span>내 자산</span></a>
-    <a href="#experts" onclick="location.hash='#experts'" class="tab"><span class="ic">👥</span><span>전문가 연결</span></a>
-    <a href="#mypage" onclick="location.hash='#mypage'" class="tab"><span class="ic">👤</span><span>마이페이지</span></a>
+  <nav class="tabbar">
+    <a href="#home" class="tab active"><span class="ic">🏠</span><span>홈</span></a>
+    <a href="#status" class="tab"><span class="ic">📊</span><span>현황</span></a>
+    <a href="#assets" class="tab"><span class="ic">💼</span><span>자산</span></a>
+    <a href="#experts" class="tab"><span class="ic">👥</span><span>전문가</span></a>
+    <a href="#mypage" class="tab"><span class="ic">👤</span><span>마이</span></a>
   </nav>
 
+  <script src="script.js"></script>
   <script>
+      // 초기 로딩 시 해시 체크
+      if(!location.hash) location.hash = "#login"; // 로그인부터 시작하도록 변경 가능
+
       function toggleMenu() {
-          const menu = document.getElementById('sideMenu');
-          const overlay = document.getElementById('menuOverlay');
-          menu.classList.toggle('active');
-          overlay.classList.toggle('active');
+          document.getElementById('sideMenu').classList.toggle('active');
+          document.getElementById('menuOverlay').classList.toggle('active');
       }
+
       function showTab(tabName) {
-          const buttons = document.querySelectorAll('.check-tab-btn');
-          buttons.forEach(btn => btn.classList.remove('active'));
+          document.querySelectorAll('.check-tab-btn').forEach(b => b.classList.remove('active'));
           event.target.classList.add('active');
-          const contents = document.querySelectorAll('.check-content');
-          contents.forEach(content => content.classList.remove('active'));
+          document.querySelectorAll('.check-content').forEach(c => c.classList.remove('active'));
           document.getElementById('tab-' + tabName).classList.add('active');
       }
-      function formatNumber(input) {
-          let value = input.value.replace(/[^0-9]/g, '');
-          if (value) input.value = parseInt(value).toLocaleString();
-      }
+
+      // [복원된 계산기 로직: 누진세율 적용]
       function calculateInheritanceTax() {
-          const asset = parseInt(document.getElementById('calc-asset').value.replace(/,/g, '') || 0);
-          const debt = parseInt(document.getElementById('calc-debt').value.replace(/,/g, '') || 0);
-          const deduction = parseInt(document.getElementById('calc-deduction').value.replace(/,/g, '') || 0);
-          let taxBase = Math.max(0, asset - debt - deduction);
-          let tax = 0;
-          if (taxBase <= 100000000) tax = taxBase * 0.1;
-          else if (taxBase <= 500000000) tax = taxBase * 0.2 - 10000000;
-          else if (taxBase <= 1000000000) tax = taxBase * 0.3 - 60000000;
-          else if (taxBase <= 3000000000) tax = taxBase * 0.4 - 160000000;
-          else tax = taxBase * 0.5 - 460000000;
-          document.getElementById('calc-tax-amount').innerText = Math.floor(Math.max(0, tax)).toLocaleString() + '원';
-          document.getElementById('calc-base').innerText = taxBase.toLocaleString();
-          document.getElementById('calc-result').classList.add('show');
+        const asset = parseInt(document.getElementById('calc-asset').value.replace(/,/g, '') || 0);
+        const debt = parseInt(document.getElementById('calc-debt').value.replace(/,/g, '') || 0);
+        const deduction = parseInt(document.getElementById('calc-deduction').value.replace(/,/g, '') || 0);
+        
+        let taxBase = Math.max(0, asset - debt - deduction);
+        let tax = 0;
+        
+        // 대한민국 상속세율 적용
+        if (taxBase <= 100000000) tax = taxBase * 0.1;
+        else if (taxBase <= 500000000) tax = taxBase * 0.2 - 10000000;
+        else if (taxBase <= 1000000000) tax = taxBase * 0.3 - 60000000;
+        else if (taxBase <= 3000000000) tax = taxBase * 0.4 - 160000000;
+        else tax = taxBase * 0.5 - 460000000;
+
+        document.getElementById('calc-base').innerText = taxBase.toLocaleString();
+        document.getElementById('calc-tax-amount').innerText = Math.floor(Math.max(0, tax)).toLocaleString() + "원";
+        document.getElementById('calc-result').style.display = 'block';
       }
+      
+      function formatNumber(el) {
+          let val = el.value.replace(/[^0-9]/g, '');
+          if(val) el.value = parseInt(val).toLocaleString();
+      }
+
+      function openQnaWrite() { document.getElementById('writeModal').classList.add('active'); }
+      function closeQnaWrite() { document.getElementById('writeModal').classList.remove('active'); }
+      
       function sendMessage(type) {
-          const input = document.getElementById('input-' + type);
-          const msgArea = document.getElementById('msg-area-' + type);
-          const text = input.value;
-          if (!text.trim()) return;
-          msgArea.insertAdjacentHTML('beforeend', `<div class="chat-bubble-row me"><div class="hstack"><div class="chat-time">방금</div><div class="chat-bubble me">${text}</div></div></div>`);
-          input.value = '';
-          msgArea.scrollTop = msgArea.scrollHeight;
-          setTimeout(() => {
-              const reply = type === 'lawyer' ? "등기 관련 서류는 '필요 서류 체크리스트'를 참고해주세요." : "상속세 공제 한도를 먼저 확인해보세요.";
-              msgArea.insertAdjacentHTML('beforeend', `<div class="chat-bubble-row you"><div class="chat-profile">${type === 'lawyer' ? '👨‍⚖️' : '👩‍💼'}</div><div><div class="chat-name">${type === 'lawyer' ? '김법무 변호사' : '이세무 세무사'}</div><div class="hstack"><div class="chat-bubble you">${reply}</div><div class="chat-time">방금</div></div></div></div>`);
-              msgArea.scrollTop = msgArea.scrollHeight;
-          }, 1000);
+         const input = document.getElementById('input-'+type);
+         const area = document.getElementById('msg-area-'+type);
+         const text = input.value.trim();
+         if(!text) return;
+         
+         area.innerHTML += `<div class="chat-bubble-row me"><div class="chat-bubble me">${text}</div></div>`;
+         input.value = '';
+         area.scrollTop = area.scrollHeight;
+         
+         // [복원된 챗봇 로직: 유형별 응답]
+         setTimeout(() => {
+             const reply = type === 'lawyer' ? "등기 관련 서류는 '필요 서류 체크리스트'를 참고해주세요." : "상속세 공제 한도를 먼저 확인해보세요.";
+             const name = type === 'lawyer' ? "김법무 변호사" : "이세무 세무사";
+             const icon = type === 'lawyer' ? "👨‍⚖️" : "👩‍💼";
+             
+             area.innerHTML += `<div class="chat-bubble-row you"><div class="chat-profile">${icon}</div><div><div class="chat-name text-xs muted mb-10">${name}</div><div class="chat-bubble you">${reply}</div></div></div>`;
+             area.scrollTop = area.scrollHeight;
+         }, 1000);
       }
       function handleEnter(e, type) { if(e.key === 'Enter') sendMessage(type); }
-      function openQnaWrite() { document.getElementById('writeModal').classList.add('active'); }
-      function closeQnaWrite() {
-          document.getElementById('writeModal').classList.remove('active');
-          document.getElementById('qna-title').value = '';
-          document.getElementById('qna-content').value = '';
-      }
+      
       function submitQuestion() {
-          const category = document.getElementById('qna-category').value;
           const title = document.getElementById('qna-title').value;
-          const content = document.getElementById('qna-content').value;
-          if(!title || !content) { alert('제목과 내용을 모두 입력해주세요.'); return; }
-          const newQnaHtml = `
-              <div class="qna-item" style="padding:15px; background:#fffbfb;">
-                  <div class="hstack space-between"><span class="qna-tag" style="color:#5F0080; font-weight:bold;">${category} <span style="font-weight:normal; color:#888;">#신규</span></span><span class="qna-status status-wait">답변대기</span></div>
-                  <div class="bold mt-6">${title}</div><div class="tiny muted mt-6">${content}</div>
-                  <div class="hstack gap-10 mt-6 tiny"><span class="muted">김○○님</span><span class="muted" style="color:#e74c3c;">방금 전</span></div>
-              </div>`;
-          document.getElementById('qna-container').insertAdjacentHTML('afterbegin', newQnaHtml);
-          alert('질문이 등록되었습니다.');
+          const cat = document.getElementById('qna-category').value;
+          if(!title) return alert('제목을 입력하세요');
+          const container = document.getElementById('qna-container');
+          container.insertAdjacentHTML('afterbegin', `
+            <div class="card">
+                <div class="hstack space-between mb-10"><span class="tag">${cat}</span><span class="status-wait">등록됨</span></div>
+                <div class="bold">${title}</div>
+                <div class="text-xs muted mt-10">방금 전 등록</div>
+            </div>
+          `);
           closeQnaWrite();
+          alert('질문이 등록되었습니다.');
       }
-
-      /* [핵심] 화면 전환 엔진 (Router) - 화면 숨김 기능 복구됨 */
-      function router() {
-          let hash = window.location.hash;
-          if (!hash) { window.location.hash = "#login"; return; } // 처음엔 로그인 화면
-          
-          document.querySelectorAll('.screen').forEach(screen => {
-              screen.classList.remove('active');
-          });
-
-          const target = document.querySelector(hash);
-          if (target) {
-              target.classList.add('active');
-              window.scrollTo(0, 0);
-          }
-          
-          document.getElementById('sideMenu').classList.remove('active');
-          document.getElementById('menuOverlay').classList.remove('active');
-      }
-      window.addEventListener('hashchange', router);
-      window.addEventListener('DOMContentLoaded', router);
   </script>
 </body>
 </html>
