@@ -1,0 +1,113 @@
+/* === 기본 레이아웃 스타일 === */
+#sideMenu { position: fixed; top: 0; left: -280px; width: 280px; height: 100%; background: white; z-index: 2000; transition: left 0.3s ease; box-shadow: 2px 0 10px rgba(0,0,0,0.1); overflow-y: auto; }
+#sideMenu.active { left: 0; }
+#menuOverlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1999; display: none; }
+#menuOverlay.active { display: block; }
+.menu-header { padding: 20px; background: #f8f9fa; border-bottom: 1px solid #eee; }
+.menu-list { list-style: none; padding: 0; margin: 0; }
+.menu-list li { border-bottom: 1px solid #f0f0f0; }
+.menu-list a { display: block; padding: 15px 20px; text-decoration: none; color: #333; font-size: 15px; }
+.badge-new { background: #e74c3c; color: white; font-size: 10px; padding: 2px 5px; border-radius: 4px; margin-left: 5px; vertical-align: middle; }
+
+/* 체크리스트 & 탭 스타일 */
+.check-tab-btn { background: white; border: 1px solid #eee; padding: 8px 16px; border-radius: 20px; font-size: 13px; color: #666; cursor: pointer; transition: 0.2s; }
+.check-tab-btn.active { background: #5F0080; color: white; border-color: #5F0080; font-weight: bold; }
+.check-content { display: none; animation: fadeIn 0.3s ease; }
+.check-content.active { display: block; }
+.check-group { margin-bottom: 20px; }
+.check-group-title { font-weight: bold; color: #5F0080; margin-bottom: 8px; font-size: 14px; background: #fdfaff; padding: 8px; border-radius: 4px; }
+.check-item { display: flex; align-items: flex-start; padding: 8px 5px; border-bottom: 1px solid #f5f5f5; cursor: pointer; }
+.check-item input[type="checkbox"] { margin-right: 10px; margin-top: 3px; transform: scale(1.2); accent-color: #5F0080; }
+.check-desc { font-size: 12px; color: #666; margin-top: 2px; }
+
+/* Q&A & 가이드 스타일 */
+.qna-item { padding: 15px 0; border-bottom: 1px solid #eee; animation: slideDown 0.3s ease; }
+.qna-tag { font-size: 11px; color: #888; margin-bottom: 4px; }
+.qna-status { font-size: 11px; padding: 2px 6px; border-radius: 4px; }
+.status-done { background: #e8f5e9; color: #2e7d32; }
+.status-wait { background: #f5f5f5; color: #757575; }
+.vs-box { background: #f8f9fa; border-radius: 8px; padding: 15px; margin-bottom: 10px; }
+.step-circle { display: inline-block; width: 20px; height: 20px; background: #5F0080; color: white; text-align: center; line-height: 20px; border-radius: 50%; font-size: 12px; margin-right: 5px; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes slideDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+
+/* 정부 문서 느낌 스타일 */
+.doc-paper { background: white; border: 1px solid #ddd; padding: 20px; box-shadow: 2px 2px 5px rgba(0,0,0,0.05); font-family: "Batang", "Serif"; position: relative; }
+.doc-header { text-align: center; border-bottom: 2px double #333; margin-bottom: 15px; padding-bottom: 10px; }
+.doc-title { font-size: 18px; font-weight: bold; color: #000; letter-spacing: 2px; }
+.doc-table { width: 100%; border-collapse: collapse; font-size: 12px; margin-bottom: 15px; }
+.doc-table th { background: #f7f7f7; border: 1px solid #888; padding: 6px; text-align: center; font-weight: bold; }
+.doc-table td { border: 1px solid #888; padding: 6px; color: #333; }
+.stamp-box { position: absolute; bottom: 20px; right: 20px; width: 50px; height: 50px; border: 3px solid #d32f2f; border-radius: 50%; color: #d32f2f; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 12px; transform: rotate(-15deg); opacity: 0.8; pointer-events: none; }
+.highlight-bg { background: #fffde7; }
+
+/* 계산기 스타일 */
+.calc-input-group { margin-bottom: 15px; }
+.calc-label { font-size: 13px; font-weight: bold; color: #555; display: block; margin-bottom: 5px; }
+.calc-input { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 16px; text-align: right; box-sizing: border-box; }
+.calc-result-box { background: #f0f4f8; padding: 20px; border-radius: 8px; text-align: center; display: none; margin-top: 20px; }
+.calc-result-box.show { display: block; animation: fadeIn 0.5s; }
+
+/* 채팅방 스타일 */
+.chat-screen { background-color: #b2c7da; min-height: 100vh; display: flex; flex-direction: column; }
+.chat-area { flex: 1; padding: 15px; overflow-y: auto; padding-bottom: 70px; }
+.chat-date { text-align: center; font-size: 10px; color: #fff; background: rgba(0,0,0,0.1); padding: 3px 10px; border-radius: 10px; margin: 10px auto; width: fit-content; }
+.chat-bubble-row { display: flex; margin-bottom: 10px; }
+.chat-bubble-row.me { justify-content: flex-end; }
+.chat-bubble { max-width: 70%; padding: 10px; border-radius: 10px; font-size: 14px; position: relative; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
+.chat-bubble.you { background: white; color: #333; border-top-left-radius: 0; }
+.chat-bubble.me { background: #5F0080; color: white; border-top-right-radius: 0; }
+.chat-profile { width: 35px; height: 35px; background: #fff; border-radius: 50%; margin-right: 8px; display: flex; align-items: center; justify-content: center; font-size: 20px; }
+.chat-name { font-size: 11px; color: #555; margin-bottom: 4px; margin-left: 2px; }
+.chat-time { font-size: 9px; color: #555; align-self: flex-end; margin: 0 5px; }
+.chat-input-bar { position: fixed; bottom: 0; left: 0; width: 100%; max-width: 600px; background: white; padding: 10px; display: flex; align-items: center; box-shadow: 0 -2px 5px rgba(0,0,0,0.05); box-sizing: border-box; }
+.chat-input { flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 20px; background: #f8f8f8; margin-right: 10px; font-size: 14px; }
+.chat-send-btn { background: #5F0080; color: white; border: none; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+
+/* 글쓰기 모달 스타일 */
+.modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 3000; display: none; align-items: center; justify-content: center; }
+.modal-overlay.active { display: flex; }
+.write-card { background: white; width: 90%; max-width: 500px; border-radius: 12px; padding: 20px; box-shadow: 0 5px 15px rgba(0,0,0,0.2); animation: slideUp 0.3s ease; }
+@keyframes slideUp { from { transform: translateY(50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+.write-label { display: block; font-size: 12px; font-weight: bold; color: #555; margin-bottom: 5px; }
+.write-input { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; margin-bottom: 15px; box-sizing: border-box; }
+.write-textarea { width: 100%; height: 100px; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; margin-bottom: 15px; resize: none; box-sizing: border-box; }
+
+/* === 기본 레이아웃 스타일 (헤더, 푸터 등) === */
+.appbar { position: fixed; top: 0; left: 0; width: 100%; height: 56px; background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); border-bottom: 1px solid rgba(0,0,0,0.05); display: flex; align-items: center; justify-content: space-between; padding: 0 15px; box-sizing: border-box; z-index: 1000; }
+.app { padding-top: 70px; padding-bottom: 80px; max-width: 600px; margin: 0 auto; box-sizing: border-box; }
+.container { padding-left: 15px; padding-right: 15px; }
+.icon-btn { background: none; border: none; font-size: 20px; cursor: pointer; padding: 5px; }
+.spacer { flex-grow: 1; }
+.brand { font-size: 18px; font-weight: bold; color: #5F0080; }
+.logo { display: inline-block; width: 24px; height: 24px; text-align: center; line-height: 24px; background: #5F0080; color: white; border-radius: 4px; margin-right: 5px; }
+.tabbar { position: fixed; bottom: 0; left: 0; width: 100%; height: 60px; background: white; border-top: 1px solid #eee; display: flex; justify-content: space-around; align-items: center; z-index: 900; }
+.tab { text-decoration: none; color: #999; font-size: 10px; display: flex; flex-direction: column; align-items: center; gap: 4px; width: 100%; }
+.tab.active { color: #5F0080; font-weight: bold; }
+.tab .ic { font-size: 20px; }
+.card { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); margin-bottom: 15px; }
+.btn { padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; border: none; font-size: 14px; transition: 0.2s; }
+.btn.primary { background: #5F0080; color: white; }
+.btn.ghost { background: transparent; color: #5F0080; }
+.btn.small { padding: 6px 12px; font-size: 12px; }
+.btn.full { width: 100%; }
+.hstack { display: flex; align-items: center; }
+.vstack { display: flex; flex-direction: column; }
+.gap-10 { gap: 10px; } .gap-4 { gap: 4px; }
+.space-between { justify-content: space-between; }
+.center { text-align: center; justify-content: center; }
+.bold { font-weight: bold; } .tiny { font-size: 12px; } .muted { color: #888; } .grow { flex-grow: 1; }
+.title-lg { font-size: 22px; font-weight: bold; margin: 0; }
+.title-sm { font-size: 16px; font-weight: bold; margin: 0; }
+.chip { display: inline-block; padding: 4px 8px; border-radius: 12px; font-size: 11px; background: #eee; color: #555; border: 1px solid #ddd; cursor: pointer; }
+.input { display: flex; flex-direction: column; gap: 5px; font-size: 12px; font-weight: bold; color: #555; }
+.input input { padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; }
+.grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 20px; }
+.shortcut { display: flex; flex-direction: column; align-items: center; gap: 8px; text-decoration: none; color: #333; font-size: 12px; }
+.shortcut .ic { width: 50px; height: 50px; background: #fff; border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 24px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+.list-elev { list-style: none; padding: 0; margin: 0; }
+.list-item { display: flex; align-items: center; justify-content: space-between; background: white; padding: 15px; border-radius: 12px; margin-bottom: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+.select-card { display: flex; align-items: center; gap: 15px; background: white; padding: 20px; border-radius: 12px; text-decoration: none; color: #333; box-shadow: 0 2px 5px rgba(0,0,0,0.05); border: 1px solid transparent; transition: 0.2s; }
+.select-card:hover { border-color: #5F0080; }
+.select-title { font-weight: bold; font-size: 16px; }
+.select-desc { font-size: 12px; color: #888; margin-top: 4px; }
