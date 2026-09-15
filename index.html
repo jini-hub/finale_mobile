@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#0b2451"><title>Finale | 상속 원스톱</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="app">
+<header class="topbar">
+ <button class="icon-btn" data-action="menu">☰</button>
+ <button class="brand" data-route="dashboard"><span class="brand-mark">F</span><span>Finale</span></button>
+ <div class="top-actions"><button class="icon-btn" data-action="search">⌕</button><button class="icon-btn" data-action="alerts">🔔</button></div>
+</header>
+<main id="view" class="view"></main>
+<nav class="bottom-nav"><button data-route="dashboard">⌂<small>홈</small></button><button data-route="case">▣<small>사건관리</small></button><button data-route="assets">₩<small>재산</small></button><button data-route="tasks">✓<small>할일</small></button><button data-route="mypage">●<small>내정보</small></button></nav>
+</div>
+<div id="drawer" class="drawer hidden"><div class="drawer-backdrop" data-action="close-menu"></div><aside class="drawer-panel">
+ <div class="drawer-head"><div class="brand"><span class="brand-mark">F</span> Finale</div><button class="icon-btn" data-action="close-menu">×</button></div>
+ <div class="drawer-user"><b id="drawerName">내 상속 사건</b><span id="drawerStatus">사건 미생성</span></div>
+ <button data-route="case">📋 사건 개요·기한</button><button data-route="caseInfo">🕊 피상속인 정보</button><button data-route="family">👨‍👩‍👧 상속인·가족관계</button><button data-route="assets">💰 재산·채무 전수조사</button>
+ <button data-route="decision">⚖️ 승인·포기·특수승인</button><button data-route="tax">🧾 상속세·세무</button><button data-route="division">🤝 상속재산분할</button><button data-route="will">✍️ 유언·유류분</button>
+ <button data-route="documents">📄 서류센터</button><button data-route="tasks">✅ 기한·할일 관리</button><button data-route="drafts">📝 문서·상담자료</button><button data-route="guide">📚 법률·행정 가이드</button><button data-route="expert">👩‍⚖️ 전문가 검토</button><button data-route="sources">🔎 법령·공식출처</button><button data-route="settings">⚙️ 설정·데이터</button>
+</aside></div>
+<div id="modal" class="modal hidden"></div><div id="toast" class="toast"></div>
+<script src="script.js"></script>
+</body></html>
