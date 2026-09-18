@@ -1,0 +1,8 @@
+{
+  "appId": "com.finale.caseos",
+  "appName": "Finale",
+  "webDir": "docs",
+  "server": {
+    "androidScheme": "https"
+  }
+}
